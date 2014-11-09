@@ -1,0 +1,415 @@
+
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Making a bouncing animation for your sliding menu - An Android Dev Blog</title>
+	<meta name="author" content="Antoine Merle">
+
+	
+	<meta name="description" content="This article will show you a way to introduce your sliding menu with a bouncing animation">
+	<meta name="keywords" content="sliding menu, android, bounce, bouncing, bouncing animation, fly-in-app menu, fly in app menu, animation, scroller, custom scroller">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="http://feeds.feedburner.com/AnAndroidDevBlog" rel="alternate" title="An Android Dev Blog" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://antoine-merle.com/blog/2013/04/12/making-a-bounce-animation-for-your-sliding-menu/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<link href="/stylesheets/font-awesome.min.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<link href='http://fonts.googleapis.com/css?family=Nunito:400,300,700' rel='stylesheet' type='text/css'>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+  
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-32954204-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><div class="profilepic">
+	
+	<a href="/"><img src="http://www.gravatar.com/avatar/4e3c42cc88b76f693215b1c47dd3cca6?s=160" alt="Profile Picture" style="width: 160px;" /></a>
+	
+</div>
+
+<nav id="main-nav">
+
+<a class="author" href="/">Antoine Merle</a>
+
+
+<section class="aboutme">
+  <p>
+    A blog about Android development, again.
+  </p>
+</section>
+
+<ul>
+    <li><a href="/">Blog</a></li>
+    <li>-</li>
+    <li><a href="/about">About</a></li>
+    <li>-</li>
+    <li><a href="/blog/archives">Archives</a></li>
+</ul></nav>
+
+<!-- Place this tag where you want the widget to render. -->
+<div class="g-follow" data-annotation="bubble" data-height="24" data-href="//plus.google.com/u/0/108486473528609847558" data-rel="author"></div>
+
+<!-- Place this tag after the last widget tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+
+<nav id="sub-nav">
+	<div class="social">
+		
+		
+
+		
+			<a class="twitter" href="http://twitter.com/antoine_merle" title="Twitter">Twitter</a>
+		
+		
+			<a class="github" href="https://github.com/Castorflex" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+    	
+    	
+			<a class="rss" href="http://feeds.feedburner.com/AnAndroidDevBlog" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+
+<!-- Place this tag after the last widget tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-12T13:35:00+02:00" data-updated="true" itemprop="datePublished"></time></div>
+	<h1 class="title" itemprop="name">Making a Bouncing Animation for Your Sliding Menu</h1>
+	<div class="entry-content" itemprop="articleBody"><p>The Sliding Menu, aka Fly in App Menu, appeared about one year ago (<code>@see</code> <a href="https://play.google.com/store/apps/details?id=fr.epicdream.beamy">Prixing</a>, <a href="https://play.google.com/store/apps/details?id=com.facebook.katana">Facebook</a>, etc.). Because of the ease of use and the effectiveness, the users quickly adopted this UI pattern. You can read more about this pattern <a href="http://www.androiduipatterns.com/2012/06/emerging-ui-pattern-side-navigation.html">here</a>.</p>
+
+<p>One of the cons of this pattern is the fact that it&rsquo;s hidden, so you need to inform the user he can open it. There are many ways to do this, such as guides, but there is a convenient way to do this, which is a bouncing animation when the application is first launched. That&rsquo;s what we are going to talk.</p>
+
+<!-- more -->
+
+
+<p>The bouncing animation is used by Prixing, and I think this is a very good way to introduce the menu, because it does not require any popups, tutorials, or whatever that can be so annoying for the user. If you do not know what I am talking about, I strongly suggest you to download Prixing and look at the first launch.</p>
+
+<p>I made a sample apk showing this effect. This should be available <a href="https://play.google.com/store/apps/details?id=fr.castorflex.android.BounceSlidingMenuProject">here</a>.</p>
+
+<h2>Interpolators</h2>
+
+<p>From the <a href="http://developer.android.com/reference/android/view/animation/Interpolator.html">DOC</a>:</p>
+
+<blockquote><p>An interpolator defines the rate of change of an animation. This allows the basic animation effects (alpha, scale, translate, rotate) to be accelerated, decelerated, repeated, etc.</p></blockquote>
+
+<p>But how?</p>
+
+<p>An <code>Interpolator</code> is a function defined on [0,1], returning a value, generally between 0 and 1. The animation will use an <code>Interpolator</code> to interpolate as many values as the number of the frames needed during the animation. For example, if you have a 2 sec. animation, and a 30 fps screen, you will need 60 values.</p>
+
+<p>There is some native interpolators:</p>
+
+<p><img class="center" src="/images/interpolators.png"></p>
+
+<p>The problem here with the sdk interpolators, is that they create values from 0 (for t=0) to x (for t=1). As the sliding menu needs to be closed at the end of the animation, we need to create a custom bounce interpolator. Here is the function:</p>
+
+<p>$$
+\begin{align}
+\mbox f(t) = abs(sin(pi * (t+1)²) * (1-t) \
+\end{align}
+$$</p>
+
+<p><img class="center" src="/images/interpolators2.png"></p>
+
+<h2>Bouncing Animation with Sliding Menu</h2>
+
+<blockquote><p>TL;DR; All you need is a <a href="https://gist.github.com/castorflex/5337238">GIST</a></p></blockquote>
+
+<p>This part will talk about the implementation of the bouncing animation on the android lib <code>SlidingMenu</code> (credits to Jeremy Feinstein) available <a href="https://github.com/jfeinstein10/SlidingMenu">on Github</a>.</p>
+
+<p>This lib uses a <code>Scroller</code> to make the menu slide. The problem with this class is that it requires a final position, used for the interpolation AND for the end of the animation:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">//in computeScrollOffset method     </span>
+</span><span class='line'><span class="k">if</span> <span class="o">(</span><span class="n">timePassed</span> <span class="o">&lt;</span> <span class="n">mDuration</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">//...</span>
+</span><span class='line'><span class="o">}</span><span class="k">else</span><span class="o">{</span>
+</span><span class='line'>  <span class="c1">//end of the animation</span>
+</span><span class='line'>  <span class="n">mCurrX</span> <span class="o">=</span> <span class="n">mFinalX</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">mCurrY</span> <span class="o">=</span> <span class="n">mFinalY</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">mFinished</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We do not want to set the final position at the end of the animation, but 0. The easier way to do this (I think) is to copy paste the Scroller class and add a way to set the final position:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm">* New startScroll method, with a finalX and finalY</span>
+</span><span class='line'><span class="cm">*/</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">startScroll</span><span class="o">(</span><span class="kt">int</span> <span class="n">startX</span><span class="o">,</span> <span class="kt">int</span> <span class="n">startY</span><span class="o">,</span> <span class="kt">int</span> <span class="n">dx</span><span class="o">,</span> <span class="kt">int</span> <span class="n">dy</span><span class="o">,</span> <span class="kt">int</span> <span class="n">duration</span><span class="o">,</span> <span class="kt">int</span> <span class="n">finalX</span><span class="o">,</span> <span class="kt">int</span> <span class="n">finalY</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">mMode</span> <span class="o">=</span> <span class="n">SCROLL_MODE</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">mFinished</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">mDuration</span> <span class="o">=</span> <span class="n">duration</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">mStartTime</span> <span class="o">=</span> <span class="n">AnimationUtils</span><span class="o">.</span><span class="na">currentAnimationTimeMillis</span><span class="o">();</span>
+</span><span class='line'>    <span class="n">mStartX</span> <span class="o">=</span> <span class="n">startX</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">mStartY</span> <span class="o">=</span> <span class="n">startY</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">mThresholdX</span> <span class="o">=</span> <span class="n">startX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">mThresholdY</span> <span class="o">=</span> <span class="n">startY</span> <span class="o">+</span> <span class="n">dy</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">mDeltaX</span> <span class="o">=</span> <span class="n">dx</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">mDeltaY</span> <span class="o">=</span> <span class="n">dy</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">mDurationReciprocal</span> <span class="o">=</span> <span class="mf">1.0f</span> <span class="o">/</span> <span class="o">(</span><span class="kt">float</span><span class="o">)</span> <span class="n">mDuration</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">mFinalX</span> <span class="o">=</span> <span class="n">finalX</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">mFinalY</span> <span class="o">=</span> <span class="n">finalY</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm">* Old startScroll method</span>
+</span><span class='line'><span class="cm">*/</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">startScroll</span><span class="o">(</span><span class="kt">int</span> <span class="n">startX</span><span class="o">,</span> <span class="kt">int</span> <span class="n">startY</span><span class="o">,</span> <span class="kt">int</span> <span class="n">dx</span><span class="o">,</span> <span class="kt">int</span> <span class="n">dy</span><span class="o">,</span> <span class="kt">int</span> <span class="n">duration</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">startScroll</span><span class="o">(</span><span class="n">startX</span><span class="o">,</span> <span class="n">startY</span><span class="o">,</span> <span class="n">dx</span><span class="o">,</span> <span class="n">dy</span><span class="o">,</span> <span class="n">duration</span><span class="o">,</span> <span class="n">startX</span> <span class="o">+</span> <span class="n">dx</span><span class="o">,</span> <span class="n">startY</span> <span class="o">+</span> <span class="n">dy</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We also have to set the appropriate value when the animation is done, and remove a the following test:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="k">if</span> <span class="o">(</span><span class="n">mCurrX</span> <span class="o">==</span> <span class="n">mThresholdX</span> <span class="o">&amp;&amp;</span> <span class="n">mCurrY</span> <span class="o">==</span> <span class="n">mThresholdY</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">mFinished</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Indeed, as we are waiting for the end of the animation, we don&rsquo;t want to stop if we reach the threshold.</p>
+
+<p>Then modify the Sliding Menu lib to use the new scroller:</p>
+
+<p><code>SlidingMenu.java</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">scrollWithBounceInterpolator</span><span class="o">(){</span>
+</span><span class='line'>  <span class="n">mViewAbove</span><span class="o">.</span><span class="na">scrollWithBounceInterpolator</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>CustomViewAbove.java</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">scrollWithBounceInterpolator</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="n">mViewBehind</span><span class="o">.</span><span class="na">getBehindWidth</span><span class="o">();</span> <span class="c1">//or whatever you want :D</span>
+</span><span class='line'>  <span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">(</span><span class="n">getChildCount</span><span class="o">()</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="c1">// Nothing to do.</span>
+</span><span class='line'>      <span class="n">setScrollingCacheEnabled</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+</span><span class='line'>      <span class="k">return</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>  <span class="kt">int</span> <span class="n">sx</span> <span class="o">=</span> <span class="n">getScrollX</span><span class="o">();</span>
+</span><span class='line'>  <span class="kt">int</span> <span class="n">sy</span> <span class="o">=</span> <span class="n">getScrollY</span><span class="o">();</span>
+</span><span class='line'>  <span class="kt">int</span> <span class="n">dx</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">sx</span><span class="o">;</span>
+</span><span class='line'>  <span class="kt">int</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">sy</span><span class="o">;</span>
+</span><span class='line'>  <span class="n">mBounceScroller</span><span class="o">.</span><span class="na">startScroll</span><span class="o">(</span><span class="n">sx</span><span class="o">,</span> <span class="n">sy</span><span class="o">,</span> <span class="n">dx</span><span class="o">,</span> <span class="n">dy</span><span class="o">,</span> <span class="mi">1000</span><span class="o">);</span>
+</span><span class='line'>  <span class="n">invalidate</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>add the following on the <code>computeScroll</code> method:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="k">if</span> <span class="o">(!</span><span class="n">mBounceScroller</span><span class="o">.</span><span class="na">isFinished</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">(</span><span class="n">mBounceScroller</span><span class="o">.</span><span class="na">computeScrollOffset</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>      <span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="n">mBounceScroller</span><span class="o">.</span><span class="na">getCurrX</span><span class="o">();</span>
+</span><span class='line'>      <span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="n">mBounceScroller</span><span class="o">.</span><span class="na">getCurrY</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">scrollTo</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">y</span><span class="o">);</span>
+</span><span class='line'>      <span class="c1">// Keep on drawing until the animation has finished.</span>
+</span><span class='line'>      <span class="n">invalidate</span><span class="o">();</span>
+</span><span class='line'>      <span class="k">return</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You should now be able to call <code>mSlidingMenu.scrollWithBounceInterpolator()</code> from your activity!</p>
+
+<h2>Conclusion</h2>
+
+<p>The sources of my posts are on <a href="https://github.com/castorflex/castorflex-blog/blob/master/source/_posts/2013-04-12-making-a-bounce-animation-for-your-sliding-menu.markdown">Github</a>, so do not hesitate to contribute by making pull requests, etc.</p>
+
+<p>TL;DR; I made a gist with all that you need! <a href="https://gist.github.com/castorflex/5337238">GIST</a></p>
+</div>
+
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet" tw:via="antoine_merle" tw:hashtags="androiddev"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite">
+
+<script type="text/javascript">
+      var disqus_shortname = 'castorflex';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://antoine-merle.com/blog/2013/04/12/making-a-bounce-animation-for-your-sliding-menu/';
+        var disqus_url = 'http://antoine-merle.com/blog/2013/04/12/making-a-bounce-animation-for-your-sliding-menu/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//go.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+</div>
+</section>
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Antoine Merle
+
+
+Design credit: <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a></footer>
+		</div>
+	</div>
+</body>
+</html>

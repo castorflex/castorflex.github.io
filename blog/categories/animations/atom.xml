@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: animations | An Android Dev Blog]]></title>
+  <link href="http://antoine-merle.com/blog/categories/animations/atom.xml" rel="self"/>
+  <link href="http://antoine-merle.com/"/>
+  <updated>2014-11-09T19:47:12+01:00</updated>
+  <id>http://antoine-merle.com/</id>
+  <author>
+    <name><![CDATA[Antoine Merle]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Flip your ImageViews]]></title>
+    <link href="http://antoine-merle.com/blog/2013/04/16/flip-your-imageviews/"/>
+    <updated>2013-04-16T20:06:00+02:00</updated>
+    <id>http://antoine-merle.com/blog/2013/04/16/flip-your-imageviews</id>
+    <content type="html"><![CDATA[<p>This post will be cut in two parts. In the first part, I&rsquo;ll present my small android library <a href="https://github.com/castorflex/FlipImageView">FlipImageView</a> which allows you to create easily an <code>ImageView</code> which can turn into another <code>Drawable</code>. Then I&rsquo;ll show you how the animation is performed and how you can modify it.</p>
+
+<p>You can download a sample app <a href="https://play.google.com/store/apps/details?id=fr.castorflex.android.flipimageview">on the store</a> if you want to see what it looks like.</p>
+
+<!-- more -->
+
+
+<h2>FlipImageView Library</h2>
+
+<p>As I needed it, I recently created a very small lib called <code>FlipImageView</code> available on <a href="https://github.com/castorflex/FlipImageView">Github</a>. This lib is based on <a href="https://code.google.com/p/myandroidwidgets/source/browse/trunk/FlipAnimatorExample/src/com/beanie/examples/animation/FlipAnimator/FlipAnimator.java">FlipAnimator</a>, made by Coomar, so all credits goes to him.</p>
+
+<p><code>FlipImageView extends ImageView</code>, that means if you have your own custom <code>ImageView</code>, I suggest you to extend <code>FlipImageView</code>, or look at the source code and take the animation part.</p>
+
+<p>There are two ways to create your FlipImageView:</p>
+
+<ul>
+<li>Via XML</li>
+</ul>
+
+
+<pre><code class="xml">    &lt;fr.castorflex.android.flipimageview.library.FlipImageView
+       xmlns:fiv="http://schemas.android.com/apk/res-auto"
+       android:id="@+id/imageview"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
+       android:src="@drawable/YOUR_DEFAULT_DRAWABLE"
+       fiv:flipDrawable="@drawable/YOUR_FLIPPED_DRAWABLE"
+       fiv:flipDuration="YOUR_DURATION_IN_MS"
+       fiv:flipInterpolator="@android:anim/YOUR_INTERPOLATOR"
+       fiv:flipRotations="none|x|y|z"
+       fiv:isAnimated="true|false"
+       fiv:isFlipped="true|false"
+       fiv:reverseRotation="true|false"/&gt;
+</code></pre>
+
+<ul>
+<li>Or programmatically</li>
+</ul>
+
+
+<pre><code class="java">//Standard way
+FlipImageView fiv = new FlipImageView(mContext);
+fiv.setDrawable(mDrawable); //Note that this is different from setImageDrawable(...)
+fiv.setFlippedDrawable(mDrawable);
+fiv.setIsFlipped(false);
+//etc.
+</code></pre>
+
+<p><strong><em>Note:</em></strong> <em>setDrawable is different from setImageDrawable which one will set directly the drawable to the ImageView.</em></p>
+
+<p>You can disable the flip animation by calling <code>setAnimated(false)</code>.</p>
+
+<p>The flip animation will be launched each time you click on the image. You can of course call it programmatically, with <code>toggleFlip()</code> method or <code>setFlipped(boolean flipped)</code> method. You can also Override onClick or set another <code>View.OnClickListener</code> if you do not want the image view to flip when clicked.</p>
+
+<p>You can set a <code>OnFlipListener</code> to your FlipImageView. Three events will be triggered:</p>
+
+<ol>
+<li><code>onClick(FlipImageView flipImageView)</code>: called when the imageView is clicked</li>
+<li><code>onFlipStart(FlipImageView flipImageView)</code> : called at the beginning of the flip animation</li>
+<li><code>onFlipEnd(FlipImageView flipImageView)</code>: called at the end of the animation</li>
+</ol>
+
+
+<p><strong><em>Note:</em></strong> <em>onFlipStart and OnFlipEnd won&rsquo;t be called if you disabled the flip animation.</em></p>
+
+<p>You can also reverse the animation, for example if you want your ImageView to flip in the other direction, to make a &ldquo;flip back&rdquo; transition. To do that, just call <code>setRotationReversed(true)</code> every time you flip your image.</p>
+
+<p>You can enable/disable x, y and z rotation axis via xml or programmatically too.</p>
+
+<p>I strongly recommend you to play with existing <code>interpolators</code> (bounce/overshoot are funny :p) or to create new ones. You could be surprised by the effect :p</p>
+
+<h2>How does this work?</h2>
+
+<p>Here is the transformation part:</p>
+
+<pre><code class="java">@Override
+protected void applyTransformation(float interpolatedTime, Transformation t) {
+    // Angle around the y-axis of the rotation at the given time. It is
+    // calculated both in radians and in the equivalent degrees.
+    final double radians = Math.PI * interpolatedTime;
+    float degrees = (float) (180.0 * radians / Math.PI);
+
+    // Once we reach the midpoint in the animation, we need to hide the
+    // source view and show the destination view. We also need to change
+    // the angle by 180 degrees so that the destination does not come in
+    // flipped around.
+    if (interpolatedTime &gt;= 0.5f) {
+        degrees -= 180.f;
+
+        if (!visibilitySwapped) {
+            setImageDrawable(toDrawable);
+            visibilitySwapped = true;
+        }
+    }
+
+    if (mIsRotationReversed) {
+        degrees = -degrees;
+    }
+
+    final Matrix matrix = t.getMatrix();
+
+    camera.save();
+    //We make a small translation in z axis, this is a cool effect :)
+    //Note that you can custom this too, by making a translation in the 
+    // other direction for example, to make the image move in the foreground
+    camera.translate(0.0f, 0.0f, (float) (150.0 * Math.sin(radians)));
+
+    //rotations
+    camera.rotateX(mIsRotationXEnabled ? degrees : 0);
+    camera.rotateY(mIsRotationYEnabled ? degrees : 0);
+    camera.rotateZ(mIsRotationZEnabled ? degrees : 0);
+    camera.getMatrix(matrix);
+    camera.restore();
+
+    matrix.preTranslate(-centerX, -centerY);
+    matrix.postTranslate(centerX, centerY);
+}
+</code></pre>
+
+<p>Well, I think the code is pretty clear (I added some comments too). Do not hesitate to custom the animation by trying some interpolators or modifying directly the <code>applyTransformation</code> method!</p>
+
+<h2>Conclusion</h2>
+
+<p>That was a pretty short post to introduce my lib, but I&rsquo;m sure some guys will be happy to discover that kind of small tricks which can make your app better. But however, please do not make all your controls animated, just when needed, or your app will be really annoying.</p>
+
+<p>Do not hesitate to contribute to the <a href="https://github.com/castorflex/FlipImageView">Lib</a> or to this <a href="https://github.com/castorflex/castorflex-blog/blob/master/source/_posts/2013-04-16-flip-your-imageviews.markdown">article</a> by leaving comments or making pull requests. Thanks!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Making a bouncing animation for your sliding menu]]></title>
+    <link href="http://antoine-merle.com/blog/2013/04/12/making-a-bounce-animation-for-your-sliding-menu/"/>
+    <updated>2013-04-12T13:35:00+02:00</updated>
+    <id>http://antoine-merle.com/blog/2013/04/12/making-a-bounce-animation-for-your-sliding-menu</id>
+    <content type="html"><![CDATA[<p>The Sliding Menu, aka Fly in App Menu, appeared about one year ago (<code>@see</code> <a href="https://play.google.com/store/apps/details?id=fr.epicdream.beamy">Prixing</a>, <a href="https://play.google.com/store/apps/details?id=com.facebook.katana">Facebook</a>, etc.). Because of the ease of use and the effectiveness, the users quickly adopted this UI pattern. You can read more about this pattern <a href="http://www.androiduipatterns.com/2012/06/emerging-ui-pattern-side-navigation.html">here</a>.</p>
+
+<p>One of the cons of this pattern is the fact that it&rsquo;s hidden, so you need to inform the user he can open it. There are many ways to do this, such as guides, but there is a convenient way to do this, which is a bouncing animation when the application is first launched. That&rsquo;s what we are going to talk.</p>
+
+<!-- more -->
+
+
+<p>The bouncing animation is used by Prixing, and I think this is a very good way to introduce the menu, because it does not require any popups, tutorials, or whatever that can be so annoying for the user. If you do not know what I am talking about, I strongly suggest you to download Prixing and look at the first launch.</p>
+
+<p>I made a sample apk showing this effect. This should be available <a href="https://play.google.com/store/apps/details?id=fr.castorflex.android.BounceSlidingMenuProject">here</a>.</p>
+
+<h2>Interpolators</h2>
+
+<p>From the <a href="http://developer.android.com/reference/android/view/animation/Interpolator.html">DOC</a>:</p>
+
+<blockquote><p>An interpolator defines the rate of change of an animation. This allows the basic animation effects (alpha, scale, translate, rotate) to be accelerated, decelerated, repeated, etc.</p></blockquote>
+
+<p>But how?</p>
+
+<p>An <code>Interpolator</code> is a function defined on [0,1], returning a value, generally between 0 and 1. The animation will use an <code>Interpolator</code> to interpolate as many values as the number of the frames needed during the animation. For example, if you have a 2 sec. animation, and a 30 fps screen, you will need 60 values.</p>
+
+<p>There is some native interpolators:</p>
+
+<p><img class="center" src="/images/interpolators.png"></p>
+
+<p>The problem here with the sdk interpolators, is that they create values from 0 (for t=0) to x (for t=1). As the sliding menu needs to be closed at the end of the animation, we need to create a custom bounce interpolator. Here is the function:</p>
+
+<p>$$
+\begin{align}
+\mbox f(t) = abs(sin(pi * (t+1)²) * (1-t) \
+\end{align}
+$$</p>
+
+<p><img class="center" src="/images/interpolators2.png"></p>
+
+<h2>Bouncing Animation with Sliding Menu</h2>
+
+<blockquote><p>TL;DR; All you need is a <a href="https://gist.github.com/castorflex/5337238">GIST</a></p></blockquote>
+
+<p>This part will talk about the implementation of the bouncing animation on the android lib <code>SlidingMenu</code> (credits to Jeremy Feinstein) available <a href="https://github.com/jfeinstein10/SlidingMenu">on Github</a>.</p>
+
+<p>This lib uses a <code>Scroller</code> to make the menu slide. The problem with this class is that it requires a final position, used for the interpolation AND for the end of the animation:</p>
+
+<pre><code class="java">//in computeScrollOffset method     
+if (timePassed &lt; mDuration) {
+    //...
+}else{
+    //end of the animation
+    mCurrX = mFinalX;
+    mCurrY = mFinalY;
+    mFinished = true;
+}
+</code></pre>
+
+<p>We do not want to set the final position at the end of the animation, but 0. The easier way to do this (I think) is to copy paste the Scroller class and add a way to set the final position:</p>
+
+<pre><code class="java">/**
+* New startScroll method, with a finalX and finalY
+*/
+public void startScroll(int startX, int startY, int dx, int dy, int duration, int finalX, int finalY) {
+    mMode = SCROLL_MODE;
+    mFinished = false;
+    mDuration = duration;
+    mStartTime = AnimationUtils.currentAnimationTimeMillis();
+    mStartX = startX;
+    mStartY = startY;
+    mThresholdX = startX + dx;
+    mThresholdY = startY + dy;
+    mDeltaX = dx;
+    mDeltaY = dy;
+    mDurationReciprocal = 1.0f / (float) mDuration;
+    mFinalX = finalX;
+    mFinalY = finalY;
+}
+
+
+/**
+* Old startScroll method
+*/    
+public void startScroll(int startX, int startY, int dx, int dy, int duration) {
+    startScroll(startX, startY, dx, dy, duration, startX + dx, startY + dy);
+}
+</code></pre>
+
+<p>We also have to set the appropriate value when the animation is done, and remove a the following test:</p>
+
+<pre><code class="java">if (mCurrX == mThresholdX &amp;&amp; mCurrY == mThresholdY) {
+    mFinished = true;
+}
+</code></pre>
+
+<p>Indeed, as we are waiting for the end of the animation, we don&rsquo;t want to stop if we reach the threshold.</p>
+
+<p>Then modify the Sliding Menu lib to use the new scroller:</p>
+
+<p><code>SlidingMenu.java</code></p>
+
+<pre><code class="java">public void scrollWithBounceInterpolator(){
+    mViewAbove.scrollWithBounceInterpolator();
+}
+</code></pre>
+
+<p><code>CustomViewAbove.java</code></p>
+
+<pre><code class="java">public void scrollWithBounceInterpolator() {
+    int x = mViewBehind.getBehindWidth(); //or whatever you want :D
+    int y = 0;
+    if (getChildCount() == 0) {
+        // Nothing to do.
+        setScrollingCacheEnabled(false);
+        return;
+    }
+    int sx = getScrollX();
+    int sy = getScrollY();
+    int dx = x - sx;
+    int dy = y - sy;
+    mBounceScroller.startScroll(sx, sy, dx, dy, 1000);
+    invalidate();
+}
+</code></pre>
+
+<p>add the following on the <code>computeScroll</code> method:</p>
+
+<pre><code class="java">if (!mBounceScroller.isFinished()) {
+    if (mBounceScroller.computeScrollOffset()) {
+        int x = mBounceScroller.getCurrX();
+        int y = mBounceScroller.getCurrY();
+
+        scrollTo(x, y);
+        // Keep on drawing until the animation has finished.
+        invalidate();
+        return;
+    }
+}
+</code></pre>
+
+<p>You should now be able to call <code>mSlidingMenu.scrollWithBounceInterpolator()</code> from your activity!</p>
+
+<h2>Conclusion</h2>
+
+<p>The sources of my posts are on <a href="https://github.com/castorflex/castorflex-blog/blob/master/source/_posts/2013-04-12-making-a-bounce-animation-for-your-sliding-menu.markdown">Github</a>, so do not hesitate to contribute by making pull requests, etc.</p>
+
+<p>TL;DR; I made a gist with all that you need! <a href="https://gist.github.com/castorflex/5337238">GIST</a></p>
+]]></content>
+  </entry>
+  
+</feed>

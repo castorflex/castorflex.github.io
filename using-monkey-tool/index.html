@@ -1,0 +1,229 @@
+
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Using Monkey tool - An Android Dev Blog</title>
+	<meta name="author" content="Antoine Merle">
+
+	
+	<meta name="description" content="Get started with Monkey tool for Android">
+	<meta name="keywords" content="android, monkey, tool, monkey tool, tutorial, get started">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="http://feeds.feedburner.com/AnAndroidDevBlog" rel="alternate" title="An Android Dev Blog" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://antoine-merle.com/using-monkey-tool/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<link href="/stylesheets/font-awesome.min.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<link href='http://fonts.googleapis.com/css?family=Nunito:400,300,700' rel='stylesheet' type='text/css'>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+  
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-32954204-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><div class="profilepic">
+	
+	<a href="/"><img src="http://www.gravatar.com/avatar/4e3c42cc88b76f693215b1c47dd3cca6?s=160" alt="Profile Picture" style="width: 160px;" /></a>
+	
+</div>
+
+<nav id="main-nav">
+
+<a class="author" href="/">Antoine Merle</a>
+
+
+<section class="aboutme">
+  <p>
+    A blog about Android development, again.
+  </p>
+</section>
+
+<ul>
+    <li><a href="/">Blog</a></li>
+    <li>-</li>
+    <li><a href="/about">About</a></li>
+    <li>-</li>
+    <li><a href="/blog/archives">Archives</a></li>
+</ul></nav>
+
+<!-- Place this tag where you want the widget to render. -->
+<div class="g-follow" data-annotation="bubble" data-height="24" data-href="//plus.google.com/u/0/108486473528609847558" data-rel="author"></div>
+
+<!-- Place this tag after the last widget tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+
+<nav id="sub-nav">
+	<div class="social">
+		
+		
+
+		
+			<a class="twitter" href="http://twitter.com/antoine_merle" title="Twitter">Twitter</a>
+		
+		
+			<a class="github" href="https://github.com/Castorflex" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+    	
+    	
+			<a class="rss" href="http://feeds.feedburner.com/AnAndroidDevBlog" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+
+<!-- Place this tag after the last widget tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-20T00:00:00+01:00" data-updated="true" itemprop="datePublished"></time></div>
+	<h1 class="title" itemprop="name">Using Monkey Tool</h1>
+	<div class="entry-content" itemprop="articleBody"><h1></h1>
+
+<p>This first post is dedicated to a wonderfull tool => <a href="http://developer.android.com/tools/help/monkey.html" title="Monkey">Monkey</a>!</p>
+
+<p>If you had never heard of this tool, your life is turning better now. Monkey is a simple tool which allow to <strong>generate pseudo-random gestures</strong>, on a <strong>device</strong> or on an <strong>emulator</strong>. Shortly, you can in a few seconds simulate a user using your application, but a pretty stupid one (just as all users ?) because all his actions will be generated randomly. These actions won’t make any sense, but the aim here is to <strong>detect bugs</strong> in your app, and this can be very useful.</p>
+
+<!-- more -->
+
+
+<p><strong><em>Note 1</em></strong>: <em>This is absolutely not a substitute to other tests you should do (like unit tests…). Do what I say, not what I do :p</em></p>
+
+<p><strong><em>Note 2</em></strong>: <em>For this tut, I suppose you have one emulator or a device connected in debug mode (with ADB drivers installed). I won’t detail this part.</em></p>
+
+<p>Here we go, launching cmd, and browsing to <em>[android-sdk-path]**/platform-tools.</em> The basic command to use monkey is the following:</p>
+
+<pre><code>adb shell monkey &lt;options&gt;
+</code></pre>
+
+<p>For example, if your application package is com.myapp and you want to generate 1000 gestures, with a delay of 500ms between each event, you have to use this command:</p>
+
+<pre><code>adb shell monkey -p com.myapp --throttle 500 -v 1000
+</code></pre>
+
+<p>The list of all the options is available <a href="http://developer.android.com/tools/help/monkey.html" title="Monkey">here</a>.</p>
+
+<h3>Going further…</h3>
+
+<p>If you want to go one step further, you can automate a lot of things ,like the installation on the device, the launch, screenshots, etc. with the <a href="http://developer.android.com/tools/help/monkeyrunner_concepts.html" title="monkeyrunner">monkeyrunner tool</a></p>
+
+<p>I hope you enjoyed my first tutorial, do not hesitate to comment if you have any question or share it if you liked it!</p>
+</div>
+
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet" tw:via="antoine_merle" tw:hashtags="androiddev"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite">
+
+<script type="text/javascript">
+      var disqus_shortname = 'castorflex';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://antoine-merle.com/using-monkey-tool/';
+        var disqus_url = 'http://antoine-merle.com/using-monkey-tool/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//go.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+</div>
+</section>
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Antoine Merle
+
+
+Design credit: <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a></footer>
+		</div>
+	</div>
+</body>
+</html>

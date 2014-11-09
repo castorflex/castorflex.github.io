@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: tests | An Android Dev Blog]]></title>
+  <link href="http://antoine-merle.com/blog/categories/tests/atom.xml" rel="self"/>
+  <link href="http://antoine-merle.com/"/>
+  <updated>2014-11-09T19:47:12+01:00</updated>
+  <id>http://antoine-merle.com/</id>
+  <author>
+    <name><![CDATA[Antoine Merle]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Using Monkey tool]]></title>
+    <link href="http://antoine-merle.com/using-monkey-tool/"/>
+    <updated>2012-11-20T00:00:00+01:00</updated>
+    <id>http://antoine-merle.com/using-monkey-tool</id>
+    <content type="html"><![CDATA[<h1></h1>
+
+<p>This first post is dedicated to a wonderfull tool => <a href="http://developer.android.com/tools/help/monkey.html" title="Monkey">Monkey</a>!</p>
+
+<p>If you had never heard of this tool, your life is turning better now. Monkey is a simple tool which allow to <strong>generate pseudo-random gestures</strong>, on a <strong>device</strong> or on an <strong>emulator</strong>. Shortly, you can in a few seconds simulate a user using your application, but a pretty stupid one (just as all users ?) because all his actions will be generated randomly. These actions won’t make any sense, but the aim here is to <strong>detect bugs</strong> in your app, and this can be very useful.</p>
+
+<!-- more -->
+
+
+<p><strong><em>Note 1</em></strong>: <em>This is absolutely not a substitute to other tests you should do (like unit tests…). Do what I say, not what I do :p</em></p>
+
+<p><strong><em>Note 2</em></strong>: <em>For this tut, I suppose you have one emulator or a device connected in debug mode (with ADB drivers installed). I won’t detail this part.</em></p>
+
+<p>Here we go, launching cmd, and browsing to <em>[android-sdk-path]**/platform-tools.</em> The basic command to use monkey is the following:</p>
+
+<pre><code>adb shell monkey &lt;options&gt;
+</code></pre>
+
+<p>For example, if your application package is com.myapp and you want to generate 1000 gestures, with a delay of 500ms between each event, you have to use this command:</p>
+
+<pre><code>adb shell monkey -p com.myapp --throttle 500 -v 1000
+</code></pre>
+
+<p>The list of all the options is available <a href="http://developer.android.com/tools/help/monkey.html" title="Monkey">here</a>.</p>
+
+<h3>Going further…</h3>
+
+<p>If you want to go one step further, you can automate a lot of things ,like the installation on the device, the launch, screenshots, etc. with the <a href="http://developer.android.com/tools/help/monkeyrunner_concepts.html" title="monkeyrunner">monkeyrunner tool</a></p>
+
+<p>I hope you enjoyed my first tutorial, do not hesitate to comment if you have any question or share it if you liked it!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Introduction to the Monkey Runner tool]]></title>
+    <link href="http://antoine-merle.com/introduction-to-the-monkey-runner-tool-2/"/>
+    <updated>2012-11-20T00:00:00+01:00</updated>
+    <id>http://antoine-merle.com/introduction-to-the-monkey-runner-tool-2</id>
+    <content type="html"><![CDATA[<h1></h1>
+
+<p>Hi everyone welcome and in my blog for this post dedicated to Monkey Runner (<a href="http://developer.android.com/tools/help/monkeyrunner_concepts.html">Introduction by Google here</a>). This post could be the extension of the first, which one was about Monkey (<a href="http://antoine-merle.com/monkey-tool/">link here</a>).</p>
+
+<p>This post won’t be a course but an introduction, because the aim is to discover by yourself how much this tool can be powerful. Monkey Runner is a tool which let the developer create programs which control the connected device/emulator.These programs will be developed in Python, and can install, launch and manipulate apps, and take screenshots. This is what we need to complete a Ant script which could build and sign the app for example. Indeed, if you have many applications, automate builds/tests, etc. becomes very interesting in order to gain time&hellip; and also because letting the computer to do all the job is pretty exciting!</p>
+
+<!-- more -->
+
+
+<p>
+Stop talking, and let’s go. The API is contained in three modules which are:</p>
+
+<ul>
+<li><a href="http://developer.android.com/tools/help/MonkeyRunner.html" title="MonkeyRunner">MonkeyRunner</a> : Class which provides methods for connecting a device/emulator.</li>
+<li><a href="http://developer.android.com/tools/help/MonkeyDevice.html" title="MonkeyDevice">MonkeyDevice</a> : Class which provides methods for installing/uninstalling packages, sending events to an application (gestures, keyboard events, etc.)</li>
+<li><a href="http://developer.android.com/tools/help/MonkeyImage.html">MonkeyImage</a> : Class which provides methods for capturing screenshots.</li>
+</ul>
+
+
+<p>Let’s create our monkeyrunner file, call it <em>mymonkey.py</em> for example (<em>.py</em> because I need my syntax coloring on vim :p)</p>
+
+<pre><code class="python">from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice
+import commands
+import sys
+
+# starting script
+print "start"
+
+# connection to the current device, and return a MonkeyDevice object
+device = MonkeyRunner.waitForConnection()
+
+apk_path = device.shell('pm path com.myapp')
+if apk_path.startswith('package:'):
+    print "myapp already installed."
+else:
+    print "myapp not installed, installing APKs..."
+    device.installPackage('myapp.apk')
+
+print "launching myapp..."
+device.startActivity(component='com.myapp/com.myapp.MainActivity')
+
+#screenshot
+MonkeyRunner.sleep(1)
+result = device.takeSnapshot()
+result.writeToFile('./screenshots/splash.png','png')
+print "screen 1 taken"
+
+#sending an event which simulate a click on the menu button
+device.press('KEYCODE_MENU', MonkeyDevice.DOWN_AND_UP)
+
+print "end of script"
+</code></pre>
+
+<p>To launch this script you only have to execute this command:</p>
+
+<p><code>monkeyrunner mymonkey.py</code></p>
+
+<p><strong><em>Note 1</em></strong>: <em>The monkeyrunner command is situated in [android-sdk-path]/tools/</em></p>
+
+<p><strong><em>Note 2</em></strong>: <em>If you are developing on windows, you may have to put the absolute paths (C:/etc.).</em></p>
+
+<p><strong><em>Note 3</em></strong>: <em>You can of course run your Unit tests !</em></p>
+
+<p>And voilà! You have now the most basic script in the world of the universe, which connect monkeyrunner to a device, install and launch an application, take and save a screenshot, and clic on the menu button, you can now imagine all the things you can do.</p>
+
+<p>Please if you have any criticism/notes/suggestions, do not hesitate to write a comment, and if you liked this post, do not hesitate to share it!</p>
+]]></content>
+  </entry>
+  
+</feed>

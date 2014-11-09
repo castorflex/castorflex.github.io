@@ -1,0 +1,375 @@
+
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Make your ProgressBar smoother - An Android Dev Blog</title>
+	<meta name="author" content="Antoine Merle">
+
+	
+	<meta name="description" content="We will see in the post a way to reproduce the progress bar in the gmail app. This progress bar use a custom indeterminateDrawable to make it &hellip;">
+	<meta name="keywords" content="android, smooth progress bar, progressbar, smooth, smoother, gmail, indeterminate drawable, custom, indeterminateDrawable">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="http://feeds.feedburner.com/AnAndroidDevBlog" rel="alternate" title="An Android Dev Blog" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://antoine-merle.com/blog/2013/11/12/make-your-progressbar-more-smooth/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<link href="/stylesheets/font-awesome.min.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<link href='http://fonts.googleapis.com/css?family=Nunito:400,300,700' rel='stylesheet' type='text/css'>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+  
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-32954204-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><div class="profilepic">
+	
+	<a href="/"><img src="http://www.gravatar.com/avatar/4e3c42cc88b76f693215b1c47dd3cca6?s=160" alt="Profile Picture" style="width: 160px;" /></a>
+	
+</div>
+
+<nav id="main-nav">
+
+<a class="author" href="/">Antoine Merle</a>
+
+
+<section class="aboutme">
+  <p>
+    A blog about Android development, again.
+  </p>
+</section>
+
+<ul>
+    <li><a href="/">Blog</a></li>
+    <li>-</li>
+    <li><a href="/about">About</a></li>
+    <li>-</li>
+    <li><a href="/blog/archives">Archives</a></li>
+</ul></nav>
+
+<!-- Place this tag where you want the widget to render. -->
+<div class="g-follow" data-annotation="bubble" data-height="24" data-href="//plus.google.com/u/0/108486473528609847558" data-rel="author"></div>
+
+<!-- Place this tag after the last widget tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+
+<nav id="sub-nav">
+	<div class="social">
+		
+		
+
+		
+			<a class="twitter" href="http://twitter.com/antoine_merle" title="Twitter">Twitter</a>
+		
+		
+			<a class="github" href="https://github.com/Castorflex" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+    	
+    	
+			<a class="rss" href="http://feeds.feedburner.com/AnAndroidDevBlog" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+
+<!-- Place this tag after the last widget tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-11-12T21:00:00+01:00" data-updated="true" itemprop="datePublished"></time></div>
+	<h1 class="title" itemprop="name">Make Your ProgressBar Smoother</h1>
+	<div class="entry-content" itemprop="articleBody"><p>If you use the android Gmail application, you probably noticed that the progress bar is a bit customized.   I am not talking about the pull to resfresh but the indeterminate progress bar which appears just after. This indeterminate drawable is much smoother than the usual.</p>
+
+<p>I will show you in this post a way to reproduce this smooth indeterminate horizontal progress bar. Here is the result: the first progress bar uses the default indeterminate drawable while the others are all custom.</p>
+
+<div class="embed-video-container"><iframe src="http://www.youtube.com/embed/qt4lvQmY0F0 "></iframe></div>
+
+
+<p><em>There is apparently a problem with the size of the video, so you might want to click <a href="http://www.youtube.com/watch?v=qt4lvQmY0F0">on this link</a> to see it on Youtube.</em></p>
+
+<!-- more -->
+
+
+<h1>How does the default animation work</h1>
+
+<p>First of all, you will need to use the Horizontal progress bar style: <code>Widget.ProgressBar.Horizontal</code> for pre ICS and <code>Widget.Holo.ProgressBar.Horizontal</code> for post ICS devices. This gives us two important parameters: <code>indeterminateOnly=false</code> and <code>indeterminateDrawable</code>.</p>
+
+<p>The default indeterminate drawable looks like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;animation-list</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span> <span class="na">android:oneshot=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;item</span> <span class="na">android:drawable=</span><span class="s">&quot;@drawable/progressbar_indeterminate_holo1&quot;</span> <span class="na">android:duration=</span><span class="s">&quot;50&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;item</span> <span class="na">android:drawable=</span><span class="s">&quot;@drawable/progressbar_indeterminate_holo2&quot;</span> <span class="na">android:duration=</span><span class="s">&quot;50&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;item</span> <span class="na">android:drawable=</span><span class="s">&quot;@drawable/progressbar_indeterminate_holo3&quot;</span> <span class="na">android:duration=</span><span class="s">&quot;50&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;item</span> <span class="na">android:drawable=</span><span class="s">&quot;@drawable/progressbar_indeterminate_holo4&quot;</span> <span class="na">android:duration=</span><span class="s">&quot;50&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;item</span> <span class="na">android:drawable=</span><span class="s">&quot;@drawable/progressbar_indeterminate_holo5&quot;</span> <span class="na">android:duration=</span><span class="s">&quot;50&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;item</span> <span class="na">android:drawable=</span><span class="s">&quot;@drawable/progressbar_indeterminate_holo6&quot;</span> <span class="na">android:duration=</span><span class="s">&quot;50&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;item</span> <span class="na">android:drawable=</span><span class="s">&quot;@drawable/progressbar_indeterminate_holo7&quot;</span> <span class="na">android:duration=</span><span class="s">&quot;50&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;item</span> <span class="na">android:drawable=</span><span class="s">&quot;@drawable/progressbar_indeterminate_holo8&quot;</span> <span class="na">android:duration=</span><span class="s">&quot;50&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'><span class="nt">&lt;/animation-list&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It&rsquo;s a simple animation drawable. That&rsquo;s why we cannot have the smoothness we want. We just have to make a custom indeterminate drawable which dynamically draws lines instead of drawing bitmaps.</p>
+
+<h1>The custom indeterminate drawable</h1>
+
+<p>Here is my original idea (don&rsquo;t be impressed by my graphic skills):</p>
+
+<p><img class="center" src="/images/smoothprogressbar_exponential.png"></p>
+
+<p>Basically we have some kind of exponential function we use to compute the length of each part of the drawable. In fact, the code is even simpler than that. We just have to loop and draw lines bigger than the previous one. You also have to take the offset in account, as this value will let you to have an animation.</p>
+
+<p><em><strong>Note</strong>: My math skills are a bit poor, so I might be saying some stupid stuff, don&rsquo;t hesitate to comment :)</em></p>
+
+<p>Here is the code I used.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+</span><span class='line'><span class="c1">// we loop to draw lines until we reach the max width</span>
+</span><span class='line'><span class="k">while</span> <span class="o">(</span><span class="n">prev</span> <span class="o">&lt;</span> <span class="n">width</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kt">float</span> <span class="n">value</span> <span class="o">=</span> <span class="o">(</span><span class="kt">float</span><span class="o">)</span> <span class="n">Math</span><span class="o">.</span><span class="na">expm1</span><span class="o">(++</span><span class="n">i</span> <span class="o">+</span> <span class="n">offset</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">prev</span><span class="o">,</span> <span class="n">centerY</span><span class="o">,</span> <span class="n">prev</span> <span class="o">+</span> <span class="n">value</span> <span class="o">-</span> <span class="n">mSeparatorWidth</span><span class="o">,</span> <span class="n">centerY</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">prev</span> <span class="o">=</span> <span class="n">value</span> <span class="o">+</span> <span class="n">prev</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I used the expm1 function (which returns exp(x) - 1) but you can try any growing function. We could imagine a function which multiply by two the previous part each time, or some kind of fibonacci sequence.</p>
+
+<p>Here is the result for the code above:</p>
+
+<p><img class="center" src="/images/smoothprogressbar.gif"></p>
+
+<p>I could stop here but I wanted to go further and give to our drawable the possibility to be fully customizable.</p>
+
+<h1>Use interpolators!</h1>
+
+<p>I&rsquo;ve always loved the relation between these curves and animations. It allows developers to radically change their animation in just one line. You can make it bounce, overshoot,&hellip; just by changing the interpolator. I used interpolators here to change the way the animation looks like.</p>
+
+<p>A chart is better than words:</p>
+
+<p><img class="center" src="/images/smoothprogressbar_interpolator.png"></p>
+
+<p>Well. Seeing this, code would be better than my chart. Sorry about that.</p>
+
+<p>Basically, we set a number of sections. The interpolator will give us the ratio of each section&rsquo;s length. The animation is done by an offset, incremented at each frame.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kt">int</span> <span class="n">width</span> <span class="o">=</span> <span class="n">mBounds</span><span class="o">.</span><span class="na">width</span><span class="o">()</span> <span class="o">+</span> <span class="n">mSeparatorWidth</span><span class="o">;</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">centerY</span> <span class="o">=</span> <span class="n">mBounds</span><span class="o">.</span><span class="na">centerY</span><span class="o">();</span>
+</span><span class='line'><span class="kt">float</span> <span class="n">xSectionWidth</span> <span class="o">=</span> <span class="mi">1</span><span class="n">f</span> <span class="o">/</span> <span class="n">mSectionsCount</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">//line before the first section</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">offset</span> <span class="o">=</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="n">Math</span><span class="o">.</span><span class="na">abs</span><span class="o">(</span><span class="n">mInterpolator</span><span class="o">.</span><span class="na">getInterpolation</span><span class="o">(</span><span class="n">mCurrentOffset</span><span class="o">)</span> <span class="o">-</span> <span class="n">mInterpolator</span><span class="o">.</span><span class="na">getInterpolation</span><span class="o">(</span><span class="mi">0</span><span class="o">))</span> <span class="o">*</span> <span class="n">width</span><span class="o">);</span>
+</span><span class='line'><span class="k">if</span> <span class="o">(</span><span class="n">offset</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">offset</span> <span class="o">&gt;</span> <span class="n">mSeparatorWidth</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">centerY</span><span class="o">,</span> <span class="n">offset</span> <span class="o">-</span> <span class="n">mSeparatorWidth</span><span class="o">,</span> <span class="n">centerY</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">prev</span><span class="o">;</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">end</span><span class="o">;</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">spaceLength</span><span class="o">;</span>
+</span><span class='line'><span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">mSectionsCount</span><span class="o">;</span> <span class="o">++</span><span class="n">i</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kt">float</span> <span class="n">xOffset</span> <span class="o">=</span> <span class="n">xSectionWidth</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="n">mCurrentOffset</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">prev</span> <span class="o">=</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="n">mInterpolator</span><span class="o">.</span><span class="na">getInterpolation</span><span class="o">(</span><span class="n">xOffset</span><span class="o">)</span> <span class="o">*</span> <span class="n">width</span><span class="o">);</span>
+</span><span class='line'>    <span class="kt">float</span> <span class="n">ratioSectionWidth</span> <span class="o">=</span>
+</span><span class='line'>            <span class="n">Math</span><span class="o">.</span><span class="na">abs</span><span class="o">(</span><span class="n">mInterpolator</span><span class="o">.</span><span class="na">getInterpolation</span><span class="o">(</span><span class="n">xOffset</span><span class="o">)</span> <span class="o">-</span>
+</span><span class='line'>                    <span class="n">mInterpolator</span><span class="o">.</span><span class="na">getInterpolation</span><span class="o">(</span><span class="n">Math</span><span class="o">.</span><span class="na">min</span><span class="o">(</span><span class="n">xOffset</span> <span class="o">+</span> <span class="n">xSectionWidth</span><span class="o">,</span> <span class="mi">1</span><span class="n">f</span><span class="o">)));</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//separator between each piece of line                </span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">sectionWidth</span> <span class="o">=</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="n">width</span> <span class="o">*</span> <span class="n">ratioSectionWidth</span><span class="o">);</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">sectionWidth</span> <span class="o">+</span> <span class="n">prev</span> <span class="o">&lt;</span> <span class="n">width</span><span class="o">)</span>
+</span><span class='line'>        <span class="n">spaceLength</span> <span class="o">=</span> <span class="n">Math</span><span class="o">.</span><span class="na">min</span><span class="o">(</span><span class="n">sectionWidth</span><span class="o">,</span> <span class="n">mSeparatorWidth</span><span class="o">);</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="n">spaceLength</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">drawLength</span> <span class="o">=</span> <span class="n">sectionWidth</span> <span class="o">&gt;</span> <span class="n">spaceLength</span> <span class="o">?</span> <span class="n">sectionWidth</span> <span class="o">-</span> <span class="n">spaceLength</span> <span class="o">:</span> <span class="mi">0</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">end</span> <span class="o">=</span> <span class="n">prev</span> <span class="o">+</span> <span class="n">drawLength</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">end</span> <span class="o">&gt;</span> <span class="n">prev</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">canvas</span><span class="o">.</span><span class="na">drawLine</span><span class="o">(</span><span class="n">prev</span><span class="o">,</span> <span class="n">centerY</span><span class="o">,</span> <span class="n">end</span><span class="o">,</span> <span class="n">centerY</span><span class="o">,</span> <span class="n">mPaint</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Here is the result with some basic interpolators:</p>
+
+<p><img class="center" src="/images/smoothprogressbar_all.gif"></p>
+
+<p>Sorry about the lag in the gif, a sample apk will be available soon, so stay tuned ;)</p>
+
+<p><strong>Limitations</strong>: Your interpolator must be a monotonic function!</p>
+
+<h1>Library</h1>
+
+<p>I made a small lib available <a href="https://github.com/castorflex/SmoothProgressBar">on Github</a>! do not hesitate to fork it and make pull requests!</p>
+</div>
+
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet" tw:via="antoine_merle" tw:hashtags="androiddev"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite">
+
+<script type="text/javascript">
+      var disqus_shortname = 'castorflex';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://antoine-merle.com/blog/2013/11/12/make-your-progressbar-more-smooth/';
+        var disqus_url = 'http://antoine-merle.com/blog/2013/11/12/make-your-progressbar-more-smooth/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//go.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+</div>
+</section>
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Antoine Merle
+
+
+Design credit: <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a></footer>
+		</div>
+	</div>
+</body>
+</html>

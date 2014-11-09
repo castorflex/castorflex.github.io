@@ -1,0 +1,296 @@
+
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Introduction to the Monkey Runner tool - An Android Dev Blog</title>
+	<meta name="author" content="Antoine Merle">
+
+	
+	<meta name="description" content="Tutorial: first steps with monkey runner tool">
+	<meta name="keywords" content="android, tutorial, monkey, monkey runner, monkeyRunner, tool">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="http://feeds.feedburner.com/AnAndroidDevBlog" rel="alternate" title="An Android Dev Blog" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://antoine-merle.com/introduction-to-the-monkey-runner-tool-2/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<link href="/stylesheets/font-awesome.min.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<link href='http://fonts.googleapis.com/css?family=Nunito:400,300,700' rel='stylesheet' type='text/css'>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+  
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-32954204-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><div class="profilepic">
+	
+	<a href="/"><img src="http://www.gravatar.com/avatar/4e3c42cc88b76f693215b1c47dd3cca6?s=160" alt="Profile Picture" style="width: 160px;" /></a>
+	
+</div>
+
+<nav id="main-nav">
+
+<a class="author" href="/">Antoine Merle</a>
+
+
+<section class="aboutme">
+  <p>
+    A blog about Android development, again.
+  </p>
+</section>
+
+<ul>
+    <li><a href="/">Blog</a></li>
+    <li>-</li>
+    <li><a href="/about">About</a></li>
+    <li>-</li>
+    <li><a href="/blog/archives">Archives</a></li>
+</ul></nav>
+
+<!-- Place this tag where you want the widget to render. -->
+<div class="g-follow" data-annotation="bubble" data-height="24" data-href="//plus.google.com/u/0/108486473528609847558" data-rel="author"></div>
+
+<!-- Place this tag after the last widget tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+
+<nav id="sub-nav">
+	<div class="social">
+		
+		
+
+		
+			<a class="twitter" href="http://twitter.com/antoine_merle" title="Twitter">Twitter</a>
+		
+		
+			<a class="github" href="https://github.com/Castorflex" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+    	
+    	
+			<a class="rss" href="http://feeds.feedburner.com/AnAndroidDevBlog" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+
+<!-- Place this tag after the last widget tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-20T00:00:00+01:00" data-updated="true" itemprop="datePublished"></time></div>
+	<h1 class="title" itemprop="name">Introduction to the Monkey Runner Tool</h1>
+	<div class="entry-content" itemprop="articleBody"><h1></h1>
+
+<p>Hi everyone welcome and in my blog for this post dedicated to Monkey Runner (<a href="http://developer.android.com/tools/help/monkeyrunner_concepts.html">Introduction by Google here</a>). This post could be the extension of the first, which one was about Monkey (<a href="http://antoine-merle.com/monkey-tool/">link here</a>).</p>
+
+<p>This post won’t be a course but an introduction, because the aim is to discover by yourself how much this tool can be powerful. Monkey Runner is a tool which let the developer create programs which control the connected device/emulator.These programs will be developed in Python, and can install, launch and manipulate apps, and take screenshots. This is what we need to complete a Ant script which could build and sign the app for example. Indeed, if you have many applications, automate builds/tests, etc. becomes very interesting in order to gain time&hellip; and also because letting the computer to do all the job is pretty exciting!</p>
+
+<!-- more -->
+
+
+<p>
+Stop talking, and let’s go. The API is contained in three modules which are:</p>
+
+<ul>
+<li><a href="http://developer.android.com/tools/help/MonkeyRunner.html" title="MonkeyRunner">MonkeyRunner</a> : Class which provides methods for connecting a device/emulator.</li>
+<li><a href="http://developer.android.com/tools/help/MonkeyDevice.html" title="MonkeyDevice">MonkeyDevice</a> : Class which provides methods for installing/uninstalling packages, sending events to an application (gestures, keyboard events, etc.)</li>
+<li><a href="http://developer.android.com/tools/help/MonkeyImage.html">MonkeyImage</a> : Class which provides methods for capturing screenshots.</li>
+</ul>
+
+
+<p>Let’s create our monkeyrunner file, call it <em>mymonkey.py</em> for example (<em>.py</em> because I need my syntax coloring on vim :p)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">from</span> <span class="nn">com.android.monkeyrunner</span> <span class="kn">import</span> <span class="n">MonkeyRunner</span><span class="p">,</span> <span class="n">MonkeyDevice</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">commands</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">sys</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># starting script</span>
+</span><span class='line'><span class="k">print</span> <span class="s">&quot;start&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># connection to the current device, and return a MonkeyDevice object</span>
+</span><span class='line'><span class="n">device</span> <span class="o">=</span> <span class="n">MonkeyRunner</span><span class="o">.</span><span class="n">waitForConnection</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">apk_path</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">shell</span><span class="p">(</span><span class="s">&#39;pm path com.myapp&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="k">if</span> <span class="n">apk_path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;package:&#39;</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">print</span> <span class="s">&quot;myapp already installed.&quot;</span>
+</span><span class='line'><span class="k">else</span><span class="p">:</span>
+</span><span class='line'>    <span class="k">print</span> <span class="s">&quot;myapp not installed, installing APKs...&quot;</span>
+</span><span class='line'>    <span class="n">device</span><span class="o">.</span><span class="n">installPackage</span><span class="p">(</span><span class="s">&#39;myapp.apk&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">print</span> <span class="s">&quot;launching myapp...&quot;</span>
+</span><span class='line'><span class="n">device</span><span class="o">.</span><span class="n">startActivity</span><span class="p">(</span><span class="n">component</span><span class="o">=</span><span class="s">&#39;com.myapp/com.myapp.MainActivity&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">#screenshot</span>
+</span><span class='line'><span class="n">MonkeyRunner</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'><span class="n">result</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">takeSnapshot</span><span class="p">()</span>
+</span><span class='line'><span class="n">result</span><span class="o">.</span><span class="n">writeToFile</span><span class="p">(</span><span class="s">&#39;./screenshots/splash.png&#39;</span><span class="p">,</span><span class="s">&#39;png&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="k">print</span> <span class="s">&quot;screen 1 taken&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">#sending an event which simulate a click on the menu button</span>
+</span><span class='line'><span class="n">device</span><span class="o">.</span><span class="n">press</span><span class="p">(</span><span class="s">&#39;KEYCODE_MENU&#39;</span><span class="p">,</span> <span class="n">MonkeyDevice</span><span class="o">.</span><span class="n">DOWN_AND_UP</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">print</span> <span class="s">&quot;end of script&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>To launch this script you only have to execute this command:</p>
+
+<p><code>monkeyrunner mymonkey.py</code></p>
+
+<p><strong><em>Note 1</em></strong>: <em>The monkeyrunner command is situated in [android-sdk-path]/tools/</em></p>
+
+<p><strong><em>Note 2</em></strong>: <em>If you are developing on windows, you may have to put the absolute paths (C:/etc.).</em></p>
+
+<p><strong><em>Note 3</em></strong>: <em>You can of course run your Unit tests !</em></p>
+
+<p>And voilà! You have now the most basic script in the world of the universe, which connect monkeyrunner to a device, install and launch an application, take and save a screenshot, and clic on the menu button, you can now imagine all the things you can do.</p>
+
+<p>Please if you have any criticism/notes/suggestions, do not hesitate to write a comment, and if you liked this post, do not hesitate to share it!</p>
+</div>
+
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet" tw:via="antoine_merle" tw:hashtags="androiddev"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite">
+
+<script type="text/javascript">
+      var disqus_shortname = 'castorflex';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://antoine-merle.com/introduction-to-the-monkey-runner-tool-2/';
+        var disqus_url = 'http://antoine-merle.com/introduction-to-the-monkey-runner-tool-2/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//go.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+</div>
+</section>
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Antoine Merle
+
+
+Design credit: <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a></footer>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,508 @@
+
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Adding a Foreground Selector to a View/ViewGroup - An Android Dev Blog</title>
+	<meta name="author" content="Antoine Merle">
+
+	
+	<meta name="description" content="You will see in this post how to implement a foreground selector for either a ViewGroup or a basic View in Android. This effect is often used in &hellip;">
+	<meta name="keywords" content="android, selector, foreground, background, card, cards, android add foreground selector, touch feedback, google play">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="http://feeds.feedburner.com/AnAndroidDevBlog" rel="alternate" title="An Android Dev Blog" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://antoine-merle.com/blog/2013/07/17/adding-a-foreground-selector-to-a-view/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<link href="/stylesheets/font-awesome.min.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<link href='http://fonts.googleapis.com/css?family=Nunito:400,300,700' rel='stylesheet' type='text/css'>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+  
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-32954204-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><div class="profilepic">
+	
+	<a href="/"><img src="http://www.gravatar.com/avatar/4e3c42cc88b76f693215b1c47dd3cca6?s=160" alt="Profile Picture" style="width: 160px;" /></a>
+	
+</div>
+
+<nav id="main-nav">
+
+<a class="author" href="/">Antoine Merle</a>
+
+
+<section class="aboutme">
+  <p>
+    A blog about Android development, again.
+  </p>
+</section>
+
+<ul>
+    <li><a href="/">Blog</a></li>
+    <li>-</li>
+    <li><a href="/about">About</a></li>
+    <li>-</li>
+    <li><a href="/blog/archives">Archives</a></li>
+</ul></nav>
+
+<!-- Place this tag where you want the widget to render. -->
+<div class="g-follow" data-annotation="bubble" data-height="24" data-href="//plus.google.com/u/0/108486473528609847558" data-rel="author"></div>
+
+<!-- Place this tag after the last widget tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+
+<nav id="sub-nav">
+	<div class="social">
+		
+		
+
+		
+			<a class="twitter" href="http://twitter.com/antoine_merle" title="Twitter">Twitter</a>
+		
+		
+			<a class="github" href="https://github.com/Castorflex" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+    	
+    	
+			<a class="rss" href="http://feeds.feedburner.com/AnAndroidDevBlog" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+
+<!-- Place this tag after the last widget tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-17T23:34:00+02:00" data-updated="true" itemprop="datePublished"></time></div>
+	<h1 class="title" itemprop="name">Adding a Foreground Selector to a View/ViewGroup</h1>
+	<div class="entry-content" itemprop="articleBody"><p>Everyone has already seen the android cards touch feedback. The selector is drawn in the foreground instead of in the background (as we usually implement it). This effect is in fact pretty simple to implement, and is already implemented in some cases.</p>
+
+<p>Here is a screenshot of the press state effect in the Google Play app:</p>
+
+<p><img class="center" src="/images/screenshot_googleplay.png"></p>
+
+<!-- more -->
+
+
+<h1>I.  If your view is a <code>FrameLayout</code></h1>
+
+<p>This is the easiest way to add a foreground selector because there is a <a href="http://developer.android.com/reference/android/widget/FrameLayout.html#setForeground(android.graphics.drawable.Drawable)">method</a> for that! Indeed, you just have to pass your selector as <code>android:foreground</code> in your xml or programmatically, calling <code>setForeground(Drawable)</code>.</p>
+
+<h1>II. If your view is not a <code>FrameLayout</code></h1>
+
+<p>Don&rsquo;t worry, this is pretty simple. Basically, we just have to set right state to the selector (pressed, focused, etc.), set the bounds and draw it after the view itself. In that way, the selector will be drawn after, and as a consequence, over the view.</p>
+
+<h3>Changing the state</h3>
+
+<p>In the <code>View</code> class, a method is called each time the state of the view changes. This method is <code>drawableStateChanged()</code> (<a href="http://developer.android.com/reference/android/view/View.html#drawableStateChanged()">DOC HERE</a>).</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">drawableStateChanged</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kd">super</span><span class="o">.</span><span class="na">drawableStateChanged</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">mForegroundSelector</span><span class="o">.</span><span class="na">setState</span><span class="o">(</span><span class="n">getDrawableState</span><span class="o">());</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">//redraw</span>
+</span><span class='line'>  <span class="n">invalidate</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Updating the drawable bounds</h3>
+
+<p>A method is called each time the size of the view changes. This method is <code>onSizeChanged(int, int, int, int)</code> (<a href="http://developer.android.com/reference/android/view/View.html#onSizeChanged(int,">DOC HERE</a>).</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onSizeChanged</span><span class="o">(</span><span class="kt">int</span> <span class="n">width</span><span class="o">,</span> <span class="kt">int</span> <span class="n">height</span><span class="o">,</span> <span class="kt">int</span> <span class="n">oldwidth</span><span class="o">,</span> <span class="kt">int</span> <span class="n">oldheight</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kd">super</span><span class="o">.</span><span class="na">onSizeChanged</span><span class="o">(</span><span class="n">width</span><span class="o">,</span> <span class="n">height</span><span class="o">,</span> <span class="n">oldwidth</span><span class="o">,</span> <span class="n">oldheight</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">mForegroundSelector</span><span class="o">.</span><span class="na">setBounds</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">width</span><span class="o">,</span> <span class="n">height</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Drawing the selector</h3>
+
+<p>There is 2 cases:</p>
+
+<h4>1.  Your view is a <strong>not</strong> a <code>ViewGroup</code></h4>
+
+<p>The selector has to be drawn after calling <code>onDraw(Canvas canvas)</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onDraw</span><span class="o">(</span><span class="n">Canvas</span> <span class="n">canvas</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kd">super</span><span class="o">.</span><span class="na">onDraw</span><span class="o">(</span><span class="n">canvas</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">mForegroundSelector</span><span class="o">.</span><span class="na">draw</span><span class="o">(</span><span class="n">canvas</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>2.  Your view is a <code>ViewGroup</code></h4>
+
+<p>The selector has to be drawn after all his children, that means after calling <code>dispatchDraw(Canvas canvas)</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">dispatchDraw</span><span class="o">(</span><span class="n">Canvas</span> <span class="n">canvas</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kd">super</span><span class="o">.</span><span class="na">dispatchDraw</span><span class="o">(</span><span class="n">canvas</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">mForegroundSelector</span><span class="o">.</span><span class="na">draw</span><span class="o">(</span><span class="n">canvas</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Drawing an animated Drawable</h1>
+
+<p>If your drawable is animated, there is a bit more to do. Let&rsquo;s suppose that we have a selector with the attribute <code>android:exitFadeDuration</code>. That means when the selector changes its state, the old state will fade out.</p>
+
+<p>We first have to move the draw method of the selector from <code>onDraw()</code> (for views) or <code>dispatchDraw()</code> (for ViewGroups) to the <code>draw(Canvas)</code> method, just like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">draw</span><span class="o">(</span><span class="n">Canvas</span> <span class="n">canvas</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kd">super</span><span class="o">.</span><span class="na">draw</span><span class="o">(</span><span class="n">canvas</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">mForegroundDrawable</span><span class="o">.</span><span class="na">draw</span><span class="o">(</span><span class="n">canvas</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then we have to Override <code>jumpDrawablesToCurrentState</code> to indicate our selector to do transition animations between states, and <code>verifyDrawable</code> to indicate the view we are displaying our own drawable.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">protected</span> <span class="kt">boolean</span> <span class="nf">verifyDrawable</span><span class="o">(</span><span class="n">Drawable</span> <span class="n">who</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">verifyDrawable</span><span class="o">(</span><span class="n">who</span><span class="o">)</span> <span class="o">||</span> <span class="o">(</span><span class="n">who</span> <span class="o">==</span> <span class="n">mForegroundDrawable</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nd">@TargetApi</span><span class="o">(</span><span class="mi">11</span><span class="o">)</span>
+</span><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">jumpDrawablesToCurrentState</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kd">super</span><span class="o">.</span><span class="na">jumpDrawablesToCurrentState</span><span class="o">();</span>
+</span><span class='line'>  <span class="n">mForegroundDrawable</span><span class="o">.</span><span class="na">jumpToCurrentState</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>But what is doing jumpToCurrentState()? Let&rsquo;s see a bit of source code, in the <code>DrawableContainer</code> class.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">jumpToCurrentState</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kt">boolean</span> <span class="n">changed</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">mLastDrawable</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mLastDrawable</span><span class="o">.</span><span class="na">jumpToCurrentState</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">mLastDrawable</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">changed</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">mCurrDrawable</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mCurrDrawable</span><span class="o">.</span><span class="na">jumpToCurrentState</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">mCurrDrawable</span><span class="o">.</span><span class="na">mutate</span><span class="o">().</span><span class="na">setAlpha</span><span class="o">(</span><span class="n">mAlpha</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">mExitAnimationEnd</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mExitAnimationEnd</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">changed</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">mEnterAnimationEnd</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mEnterAnimationEnd</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">changed</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">changed</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">invalidateSelf</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We can notice that <code>jumpToCurrentState()</code> calls <code>invalidateSelf()</code>. And here is the <code>invalidateSelf()</code> method source code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm"> * Use the current {@link Callback} implementation to have this Drawable</span>
+</span><span class='line'><span class="cm"> * redrawn.  Does nothing if there is no Callback attached to the</span>
+</span><span class='line'><span class="cm"> * Drawable.</span>
+</span><span class='line'><span class="cm"> *</span>
+</span><span class='line'><span class="cm"> * @see Callback#invalidateDrawable</span>
+</span><span class='line'><span class="cm"> * @see #getCallback() </span>
+</span><span class='line'><span class="cm"> * @see #setCallback(android.graphics.drawable.Drawable.Callback) </span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">invalidateSelf</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">final</span> <span class="n">Callback</span> <span class="n">callback</span> <span class="o">=</span> <span class="n">getCallback</span><span class="o">();</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">callback</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">callback</span><span class="o">.</span><span class="na">invalidateDrawable</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We clearly see that if the callback is not set, the drawable won&rsquo;t be redrawn.
+So let&rsquo;s set a callback when we init our selector.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">init</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">mForegroundDrawable</span> <span class="o">=</span> <span class="n">getResources</span><span class="o">().</span><span class="na">getDrawable</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">myselector</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">//set a callback, or the selector won&#39;t be animated</span>
+</span><span class='line'>  <span class="n">mForegroundDrawable</span><span class="o">.</span><span class="na">setCallback</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Your selector should fade out now!</p>
+
+<h1>Pivot position</h1>
+
+<p>If you tried to use a foreground <code>Ripple</code> drawable, you probably noticed that wherever you tap on your view, the animation will always start from the center.
+The easiest way to manage this is to override the <a href="https://developer.android.com/reference/android/view/View.html#drawableHotspotChanged(float,">drawableHotspotChanged</a> method (<em>Api 21+</em>):</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">drawableHotspotChanged</span><span class="o">(</span><span class="kt">float</span> <span class="n">x</span><span class="o">,</span> <span class="kt">float</span> <span class="n">y</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kd">super</span><span class="o">.</span><span class="na">drawableHotspotChanged</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">y</span><span class="o">);</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">(</span><span class="n">mForegroundDrawable</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">mForegroundDrawable</span><span class="o">.</span><span class="na">setHotspot</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">y</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Thanks to <a href="https://plus.google.com/+AlexLockwood/">+Alex Lockwood</a> for this :)</p>
+
+<h1>EXTRA</h1>
+
+<h3>Retrieve the default background, and set it as the foreground</h3>
+
+<p>You can get the default background selector of your theme and set it as your foreground selector if you want:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">TypedArray</span> <span class="n">a</span> <span class="o">=</span> <span class="n">getContext</span><span class="o">().</span><span class="na">obtainStyledAttributes</span><span class="o">(</span><span class="k">new</span> <span class="kt">int</span><span class="o">[]{</span><span class="n">android</span><span class="o">.</span><span class="na">R</span><span class="o">.</span><span class="na">attr</span><span class="o">.</span><span class="na">selectableItemBackground</span><span class="o">});</span>
+</span><span class='line'><span class="n">mForegroundDrawable</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="na">getDrawable</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+</span><span class='line'><span class="k">if</span> <span class="o">(</span><span class="n">mForegroundDrawable</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">mForegroundDrawable</span><span class="o">.</span><span class="na">setCallback</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="na">recycle</span><span class="o">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<h1>Conclusion</h1>
+
+<p>I made here a basic example of how to add a foreground selector to a custom view, with the main methods. To see a complete implementation (Tests if the drawable is stateful, paddings, etc.), you can look at the source code of FrameLayout.</p>
+</div>
+
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet" tw:via="antoine_merle" tw:hashtags="androiddev"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite">
+
+<script type="text/javascript">
+      var disqus_shortname = 'castorflex';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://antoine-merle.com/blog/2013/07/17/adding-a-foreground-selector-to-a-view/';
+        var disqus_url = 'http://antoine-merle.com/blog/2013/07/17/adding-a-foreground-selector-to-a-view/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//go.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+</div>
+</section>
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Antoine Merle
+
+
+Design credit: <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a></footer>
+		</div>
+	</div>
+</body>
+</html>

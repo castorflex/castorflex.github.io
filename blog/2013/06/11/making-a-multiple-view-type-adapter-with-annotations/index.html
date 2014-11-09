@@ -1,0 +1,575 @@
+
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Making a multiple view types Adapter with Annotations - An Android Dev Blog</title>
+	<meta name="author" content="Antoine Merle">
+
+	
+	<meta name="description" content="In this post, I will show you a different way to create a multiple view types adapter. I will use a custom adapter and java annotations.">
+	<meta name="keywords" content="android, java, annotation, annotations, multiple view types, different row, adapter, custom adapter, listview, baseadapter, android create annotation, tutorial, tut">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="http://feeds.feedburner.com/AnAndroidDevBlog" rel="alternate" title="An Android Dev Blog" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://antoine-merle.com/blog/2013/06/11/making-a-multiple-view-type-adapter-with-annotations/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<link href="/stylesheets/font-awesome.min.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<link href='http://fonts.googleapis.com/css?family=Nunito:400,300,700' rel='stylesheet' type='text/css'>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+  
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-32954204-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><div class="profilepic">
+	
+	<a href="/"><img src="http://www.gravatar.com/avatar/4e3c42cc88b76f693215b1c47dd3cca6?s=160" alt="Profile Picture" style="width: 160px;" /></a>
+	
+</div>
+
+<nav id="main-nav">
+
+<a class="author" href="/">Antoine Merle</a>
+
+
+<section class="aboutme">
+  <p>
+    A blog about Android development, again.
+  </p>
+</section>
+
+<ul>
+    <li><a href="/">Blog</a></li>
+    <li>-</li>
+    <li><a href="/about">About</a></li>
+    <li>-</li>
+    <li><a href="/blog/archives">Archives</a></li>
+</ul></nav>
+
+<!-- Place this tag where you want the widget to render. -->
+<div class="g-follow" data-annotation="bubble" data-height="24" data-href="//plus.google.com/u/0/108486473528609847558" data-rel="author"></div>
+
+<!-- Place this tag after the last widget tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+
+<nav id="sub-nav">
+	<div class="social">
+		
+		
+
+		
+			<a class="twitter" href="http://twitter.com/antoine_merle" title="Twitter">Twitter</a>
+		
+		
+			<a class="github" href="https://github.com/Castorflex" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+    	
+    	
+			<a class="rss" href="http://feeds.feedburner.com/AnAndroidDevBlog" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+
+<!-- Place this tag after the last widget tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-11T19:49:00+02:00" data-updated="true" itemprop="datePublished"></time></div>
+	<h1 class="title" itemprop="name">Making a Multiple View Types Adapter With Annotations</h1>
+	<div class="entry-content" itemprop="articleBody"><p>This post is more an introduction to java annotations than a tutorial about how to create an adapter able to show different rows. I won&rsquo;t describe how to implement a custom <code>Adapter</code>. Indeed, <code>ListView</code>s and <code>Adapter</code>s are common things in Android and you can easily find a <a href="http://castorflex.github.io/listview-optimisations-part-1-the-viewholder/">tutorial</a> about such components.</p>
+
+<p>TLDR: I made a <a href="https://gist.github.com/castorflex/5776863">GIST</a>.</p>
+
+<!-- more -->
+
+
+<h1>Delegates</h1>
+
+<p>Today I faced a problem. I needed a <code>ListView</code> able to display many different types of row. This is the common implementation of the <code>getView</code> method:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">int</span> <span class="nf">getViewTypeCount</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">fNUM_TYPES</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>  
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="n">View</span> <span class="nf">getView</span><span class="o">(</span><span class="n">etc</span><span class="o">...){</span>
+</span><span class='line'>  <span class="k">if</span><span class="o">(</span><span class="n">convertView</span> <span class="o">==</span> <span class="kc">null</span><span class="o">){</span>
+</span><span class='line'>      <span class="k">switch</span><span class="o">(</span><span class="n">getItemViewType</span><span class="o">(</span><span class="n">position</span><span class="o">)){</span>
+</span><span class='line'>          <span class="c1">//ugly things happen here…</span>
+</span><span class='line'>          <span class="k">case</span> <span class="mi">0</span><span class="o">:</span> <span class="c1">//create view 0 + viewHolder0 and other stuff</span>
+</span><span class='line'>              <span class="k">break</span><span class="o">;</span>
+</span><span class='line'>          <span class="k">case</span> <span class="mi">1</span><span class="o">:</span> <span class="c1">//create view 1 + viewHolder1 and other stuff</span>
+</span><span class='line'>              <span class="k">break</span><span class="o">;</span>
+</span><span class='line'>          <span class="k">case</span> <span class="mi">2</span><span class="o">:</span> <span class="c1">//create view 2 + viewHolder2 and other stuff</span>
+</span><span class='line'>              <span class="k">break</span><span class="o">;</span>
+</span><span class='line'>          <span class="k">case</span> <span class="mi">3</span><span class="o">:</span> <span class="c1">//ok you get it</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This implementation works well if you have max 2 types of rows (ok, you will have 2 in most cases, with sections and items), but if you have more types, your <code>getView(…)</code> is going to be hard to read and maintain.</p>
+
+<p>The first idea is to create custom classes in which we can delegate the <code>getView</code>.</p>
+
+<p>Create an interface called <code>DelegateAdapter</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">DelegateAdapter</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">View</span> <span class="nf">getView</span><span class="o">(</span><span class="kt">int</span> <span class="n">position</span><span class="o">,</span> <span class="n">View</span> <span class="n">convertView</span><span class="o">,</span> <span class="n">ViewGroup</span> <span class="n">parent</span><span class="o">,</span> <span class="n">LayoutInflater</span> <span class="n">inflater</span><span class="o">,</span> <span class="n">Object</span> <span class="n">item</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then you have to create a custom class implementing DelegateAdapter for each type you can have in your list. For example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SimpleTextDelegateAdapter</span> <span class="kd">implements</span> <span class="n">DelegateAdapter</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nd">@Override</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="n">View</span> <span class="nf">getView</span><span class="o">(</span><span class="kt">int</span> <span class="n">position</span><span class="o">,</span> <span class="n">View</span> <span class="n">convertView</span><span class="o">,</span> <span class="n">ViewGroup</span> <span class="n">parent</span><span class="o">,</span> <span class="n">LayoutInflater</span> <span class="n">inflater</span><span class="o">,</span> <span class="n">Object</span> <span class="n">item</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">if</span><span class="o">(</span><span class="n">convertView</span> <span class="o">==</span> <span class="kc">null</span><span class="o">){</span>
+</span><span class='line'>          <span class="c1">//same as always… create your view, set a viewholder, etc.</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then you can call the right delegate on your <code>getView()</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">int</span> <span class="nf">getViewTypeCount</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">mDelegateAdapterSparseArray</span><span class="o">.</span><span class="na">size</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>  
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="n">View</span> <span class="nf">getView</span><span class="o">(...){</span>
+</span><span class='line'>  <span class="k">switch</span><span class="o">(</span><span class="n">getItemViewType</span><span class="o">(</span><span class="n">position</span><span class="o">)){</span>
+</span><span class='line'>      <span class="k">case</span> <span class="mi">0</span><span class="o">:</span> <span class="k">return</span> <span class="n">mDelegate0</span><span class="o">.</span><span class="na">getView</span><span class="o">(</span><span class="err">…</span><span class="o">)</span>
+</span><span class='line'>          <span class="k">break</span><span class="o">;</span>
+</span><span class='line'>      <span class="k">case</span> <span class="mi">1</span><span class="o">:</span> <span class="k">return</span> <span class="n">mDelegate1</span><span class="o">.</span><span class="na">getView</span><span class="o">(</span><span class="err">…</span><span class="o">)</span>
+</span><span class='line'>          <span class="k">break</span><span class="o">;</span>
+</span><span class='line'>      <span class="k">case</span> <span class="mi">2</span><span class="o">:</span> <span class="k">return</span> <span class="n">mDelegate2</span><span class="o">.</span><span class="na">getView</span><span class="o">(</span><span class="err">…</span><span class="o">)</span>
+</span><span class='line'>          <span class="k">break</span><span class="o">;</span>
+</span><span class='line'>      <span class="k">case</span> <span class="mi">3</span><span class="o">:</span> <span class="k">return</span> <span class="n">mDelegate3</span><span class="o">.</span><span class="na">getView</span><span class="o">(</span><span class="err">…</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ok that&rsquo;s better but we still have our switch case… Let&rsquo;s create a <code>LongSparseArray</code> (<a href="http://developer.android.com/reference/android/support/v4/util/LongSparseArray.html">what is this?</a>) to get rid of this switch.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span>   <span class="n">LongSparseArray</span><span class="o">&lt;</span><span class="n">DelegateAdapter</span><span class="o">&gt;</span> <span class="n">mDelegateAdapterSparseArray</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm"> * Constructor</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="kd">public</span> <span class="nf">MyCustomAdapter</span><span class="o">(...){</span>
+</span><span class='line'>  <span class="c1">//some initializations…</span>
+</span><span class='line'>  <span class="n">initDelegates</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">initDelegates</span><span class="o">(){</span>
+</span><span class='line'>  <span class="n">mDelegateAdapterSparseArray</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LongSparseArray</span><span class="o">&lt;</span><span class="n">DelegateAdapter</span><span class="o">&gt;();</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="c1">//the first parameter represents the ItemViewType</span>
+</span><span class='line'>  <span class="n">mDelegateAdapterSparseArray</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="k">new</span> <span class="n">SimpleTextDelegateAdapter</span><span class="o">());</span>
+</span><span class='line'>  <span class="n">mDelegateAdapterSparseArray</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="k">new</span> <span class="n">HtmlTextDelegateAdapter</span><span class="o">());</span>
+</span><span class='line'>  <span class="n">mDelegateAdapterSparseArray</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="k">new</span> <span class="n">GalleryDelegateAdapter</span><span class="o">());</span>
+</span><span class='line'>  <span class="c1">//etc.</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="n">View</span> <span class="nf">getView</span><span class="o">(...){</span>
+</span><span class='line'>  <span class="n">DelegateAdapter</span> <span class="n">adapter</span> <span class="o">=</span> <span class="n">mDelegateAdapterSparseArray</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">getItemViewType</span><span class="o">(</span><span class="n">position</span><span class="o">));</span>
+</span><span class='line'>  <span class="k">if</span><span class="o">(</span><span class="n">adapter</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">){</span>
+</span><span class='line'>      <span class="n">convertView</span> <span class="o">=</span> <span class="n">adapter</span><span class="o">.</span><span class="na">getView</span><span class="o">(</span><span class="err">…</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+</span><span class='line'>      <span class="c1">//default case! this should not happen :p</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">convertView</span><span class="o">;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ok we could stop there, but I never created java annotations and I&rsquo;m very curious… so I found a way to use it in that case.</p>
+
+<h1>Annotations</h1>
+
+<p>Annotations are created with the <code>@interface</code> keyword. For each annotation you can define some parameters:</p>
+
+<ul>
+<li><p><code>@Target</code> can specify the place your annotation can be used (as a class header, method header, etc.).</p></li>
+<li><p><code>@Retention</code> specify how long your annotation will live. It can be <code>SOURCE</code>, <code>CLASS</code> or <code>RUNTIME</code>.</p></li>
+<li><code>SOURCE</code>: The annotations are not saved in <code>*.class</code> files.</li>
+<li><code>CLASS</code>:  The annotations are saved in <code>*.class</code> files, but can&rsquo;t be used by the VM. <em>(default parameter)</em></li>
+<li><code>RUNTIME</code>: Annotations save in <code>*.class</code> and can be used in runtime. Since we will use reflection, we need this parameter.</li>
+</ul>
+
+
+<p>Please note that I&rsquo;m showing you one way to do this but there are plenty.</p>
+
+<p>We will need 2 different annotations:</p>
+
+<ul>
+<li><p><code>@DelegateAdapters</code>: used on our <code>BaseAdapter</code> to indicate which adapters to delegate the <code>getView</code>. It will take the delegate classes as parameter.</p></li>
+<li><p><code>@DelegateAdapterType</code>: used on our <code>DelegateAdapter</code>s implementations. This annotation take as parameter his <code>itemViewType</code> associated.</p></li>
+</ul>
+
+
+<p><code>DelegateAdapters</code> Annotation:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Target</span><span class="o">(</span><span class="n">ElementType</span><span class="o">.</span><span class="na">TYPE</span><span class="o">)</span>    
+</span><span class='line'><span class="nd">@Retention</span><span class="o">(</span><span class="n">RetentionPolicy</span><span class="o">.</span><span class="na">RUNTIME</span><span class="o">)</span>
+</span><span class='line'><span class="kd">public</span> <span class="nd">@interface</span> <span class="n">DelegateAdapters</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">Class</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">DelegateAdapter</span><span class="o">&gt;[]</span> <span class="n">delegateAdapters</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>DelegateAdapterType</code> Annotation:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Retention</span><span class="o">(</span><span class="n">RetentionPolicy</span><span class="o">.</span><span class="na">RUNTIME</span><span class="o">)</span>
+</span><span class='line'><span class="nd">@Target</span><span class="o">(</span><span class="n">ElementType</span><span class="o">.</span><span class="na">TYPE</span><span class="o">)</span>
+</span><span class='line'><span class="kd">public</span> <span class="nd">@interface</span> <span class="n">DelegateAdapterType</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kt">long</span> <span class="nf">itemType</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong><em>Note:</em></strong> <em>You can set the itemType as optional if you set a default value:</em></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kt">long</span> <span class="nf">itemType</span><span class="o">()</span> <span class="k">default</span> <span class="mi">0</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We will use our annotations like that:</p>
+
+<p>In our base adapter:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@DelegateAdapters</span><span class="o">(</span><span class="n">delegateAdapters</span> <span class="o">=</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">SimpleTextDelegateAdapter</span><span class="o">.</span><span class="na">class</span><span class="o">,</span>
+</span><span class='line'>      <span class="n">HtmlTextDelegateAdapter</span><span class="o">.</span><span class="na">class</span><span class="o">,</span>
+</span><span class='line'>      <span class="n">GalleryDelegateAdapter</span><span class="o">.</span><span class="na">class</span>
+</span><span class='line'><span class="o">})</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyCustomAdapter</span> <span class="kd">extends</span> <span class="n">BaseAdapter</span><span class="o">{</span>
+</span><span class='line'>  <span class="err">…</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And in our delegates:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@DelegateAdapterType</span><span class="o">(</span><span class="n">itemType</span> <span class="o">=</span> <span class="mi">0</span><span class="o">)</span> <span class="c1">//note that you can use constants</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SimpleTextDelegateAdapter</span> <span class="kd">implements</span> <span class="n">DelegateAdapter</span> <span class="o">{</span>
+</span><span class='line'>  <span class="err">…</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nd">@DelegateAdapterType</span><span class="o">(</span><span class="n">itemType</span> <span class="o">=</span> <span class="mi">1</span><span class="o">)</span> <span class="c1">//note that you can use constants</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HtmlTextDelegateAdapter</span> <span class="kd">implements</span> <span class="n">DelegateAdapter</span> <span class="o">{</span>
+</span><span class='line'>  <span class="err">…</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nd">@DelegateAdapterType</span><span class="o">(</span><span class="n">itemType</span> <span class="o">=</span> <span class="mi">2</span><span class="o">)</span> <span class="c1">//note that you can use constants</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">GalleryDelegateAdapter</span> <span class="kd">implements</span> <span class="n">DelegateAdapter</span> <span class="o">{</span>
+</span><span class='line'>  <span class="err">…</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now our adapters are ready, we just need to initialize the SparseArray using reflection in the Base Adapter:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">initDelegates</span><span class="o">(){</span>
+</span><span class='line'>  <span class="n">mDelegateAdapterSparseArray</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LongSparseArray</span><span class="o">&lt;</span><span class="n">DelegateAdapter</span><span class="o">&gt;();</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="c1">//get the annotation containing all the delegate classes</span>
+</span><span class='line'>  <span class="n">DelegateAdapters</span> <span class="n">annotation</span> <span class="o">=</span> <span class="n">getClass</span><span class="o">().</span><span class="na">getAnnotation</span><span class="o">(</span><span class="n">DelegateAdapters</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">(</span><span class="n">annotation</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">Class</span><span class="o">[]</span> <span class="n">clazzs</span> <span class="o">=</span> <span class="n">annotation</span><span class="o">.</span><span class="na">delegateAdapters</span><span class="o">();</span>
+</span><span class='line'>      <span class="k">for</span> <span class="o">(</span><span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">clazz</span> <span class="o">:</span> <span class="n">clazzs</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>          <span class="n">DelegateAdapterType</span> <span class="n">delegateAdapterAnnotation</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="na">getAnnotation</span><span class="o">(</span><span class="n">DelegateAdapterType</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span><span class='line'>          <span class="c1">//check if each delegate has an itemType</span>
+</span><span class='line'>          <span class="k">if</span><span class="o">(</span><span class="n">delegateAdapterAnnotation</span> <span class="o">==</span> <span class="kc">null</span><span class="o">){</span>
+</span><span class='line'>              <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">(</span><span class="s">&quot;The class &quot;</span><span class="o">+</span><span class="n">clazz</span><span class="o">.</span><span class="na">getName</span><span class="o">()+</span><span class="s">&quot; should have the annotation DelegateAdapterType&quot;</span><span class="o">);</span>
+</span><span class='line'>          <span class="o">}</span>
+</span><span class='line'>          
+</span><span class='line'>          <span class="kt">long</span> <span class="n">itemtype</span> <span class="o">=</span> <span class="n">delegateAdapterAnnotation</span><span class="o">.</span><span class="na">itemType</span><span class="o">();</span>
+</span><span class='line'>          <span class="k">if</span><span class="o">(</span><span class="n">mDelegateAdapterSparseArray</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">itemtype</span><span class="o">)</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">){</span>
+</span><span class='line'>              <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">(</span><span class="s">&quot;The item type &quot;</span><span class="o">+</span><span class="n">itemtype</span><span class="o">+</span><span class="s">&quot; is already defined!&quot;</span><span class="o">);</span>
+</span><span class='line'>          <span class="o">}</span>
+</span><span class='line'>          
+</span><span class='line'>          <span class="c1">//instantiate with the default constructor</span>
+</span><span class='line'>          <span class="n">DelegateAdapter</span> <span class="n">adapter</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>          <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>              <span class="n">adapter</span> <span class="o">=</span> <span class="o">(</span><span class="n">DelegateAdapter</span><span class="o">)</span> <span class="n">clazz</span><span class="o">.</span><span class="na">newInstance</span><span class="o">();</span>
+</span><span class='line'>          <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>              <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">(</span><span class="s">&quot;Error while instantiating &quot;</span><span class="o">+</span><span class="n">clazz</span><span class="o">.</span><span class="na">getName</span><span class="o">()+</span><span class="s">&quot; with default constructor: &quot;</span><span class="o">+</span><span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">(),</span> <span class="n">e</span><span class="o">);</span>
+</span><span class='line'>          <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="c1">//final step!</span>
+</span><span class='line'>          <span class="n">mDelegateAdapterSparseArray</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">itemtype</span><span class="o">,</span> <span class="n">adapter</span><span class="o">);</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>  
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Conclusion</h1>
+
+<p>I hope you found it interesting. Please note this is my first custom annotation, so don&rsquo;t hesitate to tell me (via comments / g+ / twitter, etc.) if you have any remark.</p>
+
+<p>TLDR: I made a <a href="https://gist.github.com/castorflex/5776863">GIST</a>. Check it out and don&rsquo;t hesitate to modify it!</p>
+</div>
+
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet" tw:via="antoine_merle" tw:hashtags="androiddev"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite">
+
+<script type="text/javascript">
+      var disqus_shortname = 'castorflex';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://antoine-merle.com/blog/2013/06/11/making-a-multiple-view-type-adapter-with-annotations/';
+        var disqus_url = 'http://antoine-merle.com/blog/2013/06/11/making-a-multiple-view-type-adapter-with-annotations/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//go.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+</div>
+</section>
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Antoine Merle
+
+
+Design credit: <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a></footer>
+		</div>
+	</div>
+</body>
+</html>

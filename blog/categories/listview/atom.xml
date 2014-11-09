@@ -1,0 +1,724 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: listview | An Android Dev Blog]]></title>
+  <link href="http://antoine-merle.com/blog/categories/listview/atom.xml" rel="self"/>
+  <link href="http://antoine-merle.com/"/>
+  <updated>2014-11-09T19:47:12+01:00</updated>
+  <id>http://antoine-merle.com/</id>
+  <author>
+    <name><![CDATA[Antoine Merle]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Making a multiple view types Adapter with Annotations]]></title>
+    <link href="http://antoine-merle.com/blog/2013/06/11/making-a-multiple-view-type-adapter-with-annotations/"/>
+    <updated>2013-06-11T19:49:00+02:00</updated>
+    <id>http://antoine-merle.com/blog/2013/06/11/making-a-multiple-view-type-adapter-with-annotations</id>
+    <content type="html"><![CDATA[<p>This post is more an introduction to java annotations than a tutorial about how to create an adapter able to show different rows. I won&rsquo;t describe how to implement a custom <code>Adapter</code>. Indeed, <code>ListView</code>s and <code>Adapter</code>s are common things in Android and you can easily find a <a href="http://castorflex.github.io/listview-optimisations-part-1-the-viewholder/">tutorial</a> about such components.</p>
+
+<p>TLDR: I made a <a href="https://gist.github.com/castorflex/5776863">GIST</a>.</p>
+
+<!-- more -->
+
+
+<h1>Delegates</h1>
+
+<p>Today I faced a problem. I needed a <code>ListView</code> able to display many different types of row. This is the common implementation of the <code>getView</code> method:</p>
+
+<pre><code class="java">@Override
+public int getViewTypeCount() {
+    return fNUM_TYPES;
+}
+
+
+public View getView(etc...){
+    if(convertView == null){
+        switch(getItemViewType(position)){
+            //ugly things happen here…
+            case 0: //create view 0 + viewHolder0 and other stuff
+                break;
+            case 1: //create view 1 + viewHolder1 and other stuff
+                break;
+            case 2: //create view 2 + viewHolder2 and other stuff
+                break;
+            case 3: //ok you get it
+</code></pre>
+
+<p>This implementation works well if you have max 2 types of rows (ok, you will have 2 in most cases, with sections and items), but if you have more types, your <code>getView(…)</code> is going to be hard to read and maintain.</p>
+
+<p>The first idea is to create custom classes in which we can delegate the <code>getView</code>.</p>
+
+<p>Create an interface called <code>DelegateAdapter</code>:</p>
+
+<pre><code class="java">public interface DelegateAdapter {
+    public View getView(int position, View convertView, ViewGroup parent, LayoutInflater inflater, Object item);
+}
+</code></pre>
+
+<p>Then you have to create a custom class implementing DelegateAdapter for each type you can have in your list. For example:</p>
+
+<pre><code class="java">public class SimpleTextDelegateAdapter implements DelegateAdapter {
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent, LayoutInflater inflater, Object item) {
+        if(convertView == null){
+            //same as always… create your view, set a viewholder, etc.
+        }
+    }
+</code></pre>
+
+<p>Then you can call the right delegate on your <code>getView()</code>:</p>
+
+<pre><code class="java">@Override
+public int getViewTypeCount() {
+    return mDelegateAdapterSparseArray.size();
+}
+
+
+public View getView(...){
+    switch(getItemViewType(position)){
+        case 0: return mDelegate0.getView(…)
+            break;
+        case 1: return mDelegate1.getView(…)
+            break;
+        case 2: return mDelegate2.getView(…)
+            break;
+        case 3: return mDelegate3.getView(…)
+</code></pre>
+
+<p>Ok that&rsquo;s better but we still have our switch case… Let&rsquo;s create a <code>LongSparseArray</code> (<a href="http://developer.android.com/reference/android/support/v4/util/LongSparseArray.html">what is this?</a>) to get rid of this switch.</p>
+
+<pre><code class="java">private   LongSparseArray&lt;DelegateAdapter&gt; mDelegateAdapterSparseArray;
+
+/**
+ * Constructor
+ */
+public MyCustomAdapter(...){
+    //some initializations…
+    initDelegates(); 
+}
+
+private void initDelegates(){
+    mDelegateAdapterSparseArray = new LongSparseArray&lt;DelegateAdapter&gt;();
+
+    //the first parameter represents the ItemViewType
+    mDelegateAdapterSparseArray.put(0, new SimpleTextDelegateAdapter());
+    mDelegateAdapterSparseArray.put(1, new HtmlTextDelegateAdapter());
+    mDelegateAdapterSparseArray.put(2, new GalleryDelegateAdapter());
+    //etc.
+}
+
+public View getView(...){
+    DelegateAdapter adapter = mDelegateAdapterSparseArray.get(getItemViewType(position));
+    if(adapter != null){
+        convertView = adapter.getView(…);
+    }else{
+        //default case! this should not happen :p
+    }
+    return convertView;
+}
+</code></pre>
+
+<p>Ok we could stop there, but I never created java annotations and I&rsquo;m very curious… so I found a way to use it in that case.</p>
+
+<h1>Annotations</h1>
+
+<p>Annotations are created with the <code>@interface</code> keyword. For each annotation you can define some parameters:</p>
+
+<ul>
+<li><p><code>@Target</code> can specify the place your annotation can be used (as a class header, method header, etc.).</p></li>
+<li><p><code>@Retention</code> specify how long your annotation will live. It can be <code>SOURCE</code>, <code>CLASS</code> or <code>RUNTIME</code>.</p></li>
+<li><code>SOURCE</code>: The annotations are not saved in <code>*.class</code> files.</li>
+<li><code>CLASS</code>:  The annotations are saved in <code>*.class</code> files, but can&rsquo;t be used by the VM. <em>(default parameter)</em></li>
+<li><code>RUNTIME</code>: Annotations save in <code>*.class</code> and can be used in runtime. Since we will use reflection, we need this parameter.</li>
+</ul>
+
+
+<p>Please note that I&rsquo;m showing you one way to do this but there are plenty.</p>
+
+<p>We will need 2 different annotations:</p>
+
+<ul>
+<li><p><code>@DelegateAdapters</code>: used on our <code>BaseAdapter</code> to indicate which adapters to delegate the <code>getView</code>. It will take the delegate classes as parameter.</p></li>
+<li><p><code>@DelegateAdapterType</code>: used on our <code>DelegateAdapter</code>s implementations. This annotation take as parameter his <code>itemViewType</code> associated.</p></li>
+</ul>
+
+
+<p><code>DelegateAdapters</code> Annotation:</p>
+
+<pre><code class="java">@Target(ElementType.TYPE)   
+@Retention(RetentionPolicy.RUNTIME)
+public @interface DelegateAdapters {
+    Class&lt;? extends DelegateAdapter&gt;[] delegateAdapters();
+}
+</code></pre>
+
+<p><code>DelegateAdapterType</code> Annotation:</p>
+
+<pre><code class="java">@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface DelegateAdapterType {
+    long itemType();
+}
+</code></pre>
+
+<p><strong><em>Note:</em></strong> <em>You can set the itemType as optional if you set a default value:</em></p>
+
+<pre><code class="java ">long itemType() default 0;
+</code></pre>
+
+<p>We will use our annotations like that:</p>
+
+<p>In our base adapter:</p>
+
+<pre><code class="java">@DelegateAdapters(delegateAdapters = {
+        SimpleTextDelegateAdapter.class,
+        HtmlTextDelegateAdapter.class,
+        GalleryDelegateAdapter.class
+})
+public class MyCustomAdapter extends BaseAdapter{
+    …
+}
+</code></pre>
+
+<p>And in our delegates:</p>
+
+<pre><code class="java">@DelegateAdapterType(itemType = 0) //note that you can use constants
+public class SimpleTextDelegateAdapter implements DelegateAdapter {
+    …
+}
+
+@DelegateAdapterType(itemType = 1) //note that you can use constants
+public class HtmlTextDelegateAdapter implements DelegateAdapter {
+    …
+}
+
+@DelegateAdapterType(itemType = 2) //note that you can use constants
+public class GalleryDelegateAdapter implements DelegateAdapter {
+    …
+}
+</code></pre>
+
+<p>Now our adapters are ready, we just need to initialize the SparseArray using reflection in the Base Adapter:</p>
+
+<pre><code class="java">private void initDelegates(){
+    mDelegateAdapterSparseArray = new LongSparseArray&lt;DelegateAdapter&gt;();
+
+    //get the annotation containing all the delegate classes
+    DelegateAdapters annotation = getClass().getAnnotation(DelegateAdapters.class);
+    if (annotation != null) {
+        Class[] clazzs = annotation.delegateAdapters();
+        for (Class&lt;?&gt; clazz : clazzs) {
+            DelegateAdapterType delegateAdapterAnnotation = clazz.getAnnotation(DelegateAdapterType.class);
+            //check if each delegate has an itemType
+            if(delegateAdapterAnnotation == null){
+                throw new RuntimeException("The class "+clazz.getName()+" should have the annotation DelegateAdapterType");
+            }
+
+            long itemtype = delegateAdapterAnnotation.itemType();
+            if(mDelegateAdapterSparseArray.get(itemtype) != null){
+                throw new RuntimeException("The item type "+itemtype+" is already defined!");
+            }
+
+            //instantiate with the default constructor
+            DelegateAdapter adapter = null;
+            try {
+                adapter = (DelegateAdapter) clazz.newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException("Error while instantiating "+clazz.getName()+" with default constructor: "+e.getMessage(), e);
+            }
+
+            //final step!
+            mDelegateAdapterSparseArray.put(itemtype, adapter);
+        }
+    }
+
+}
+</code></pre>
+
+<h1>Conclusion</h1>
+
+<p>I hope you found it interesting. Please note this is my first custom annotation, so don&rsquo;t hesitate to tell me (via comments / g+ / twitter, etc.) if you have any remark.</p>
+
+<p>TLDR: I made a <a href="https://gist.github.com/castorflex/5776863">GIST</a>. Check it out and don&rsquo;t hesitate to modify it!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[ListView optimisations : Part 2 (Displaying images in your lists)]]></title>
+    <link href="http://antoine-merle.com/listview-optimisations-part-2-displaying-images-in-your-lists/"/>
+    <updated>2012-11-21T00:00:00+01:00</updated>
+    <id>http://antoine-merle.com/listview-optimisations-part-2-displaying-images-in-your-lists</id>
+    <content type="html"><![CDATA[<h1></h1>
+
+<p>This second post about listview optimisations will talk about the images in your lists. This post is an extension of the first, which one was about the viewholder :</p>
+
+<ul>
+<li><a href="http://antoine-merle.com/listview-optimisations-part-1-the-viewholder/" title="ListView optimisations : Part 1 (the ViewHolder)">ListView opimisation : Part 1 (the ViewHolder)</a> : The viewholder is essential when you make a listView. See this post first.</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h2>I.    The ImageLoader</h2>
+
+<p>We will create a class which will do all the job (here is the skeleton):</p>
+
+<pre><code class="java">public class ImageLoader {
+    public ImageLoader(Context context) {
+    }
+    public void displayImage(String url, ImageView imageView) {     
+    }
+}
+</code></pre>
+
+<p>And how to use it in your adapter:</p>
+
+<pre><code class="java">public class MyAdapter extends BaseAdapter {
+
+        private LayoutInflater mLayoutInflater;
+        private List mData;
+        private ImageLoader mImageLoader;
+
+        public MyAdapter(Context context, List data){
+            mData = data;
+            mLayoutInflater = LayoutInflater.from(context);
+            mImageLoader = new ImageLoader(context);
+        }
+
+        @Override
+        public int getCount() {
+            return mData == null ?  : mData.size();
+        }
+
+        @Override
+        public MyPojo getItem(int position) {
+            return mData.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View view, ViewGroup parent) {
+
+            View vi = view;             
+            ViewHolder holder = null;
+
+            if (vi == null) {
+                vi = mLayoutInflater.inflate(R.layout.item, parent, false);
+                holder = new ViewHolder();
+
+                holder.ivIcon = (ImageView) vi.findViewById(R.id.imageView_item_icon);
+                vi.setTag(holder);
+            } else {
+                holder = (ViewHolder) vi.getTag();
+            }
+
+            MyPojo item = getItem(position);
+
+            mImageLoader.displayImage(item.getIcon(), holder.icon);
+
+            return vi;
+        }
+
+        static class ViewHolder{
+            ImageView ivIcon;
+        }
+    }
+</code></pre>
+
+<p>A simple picture to understand the role of the ImageLoader:<br/>
+<img class="center" src="/images/imageloader.png"><br/>
+And his code:</p>
+
+<pre><code class="java">public class ImageLoader {
+
+        private LruCache memoryCache;
+        private FileCache fileCache;
+        private Map imageViews = Collections.synchronizedMap(new WeakHashMap());
+
+        private Drawable mStubDrawable;
+
+        public ImageLoader(Context context) {
+            fileCache = new FileCache(context);
+            init(context);
+        }
+
+        private void init(Context context) {
+            // Get memory class of this device, exceeding this amount will throw an
+            // OutOfMemory exception.
+            final int memClass = ((ActivityManager) context.getSystemService(
+                    Context.ACTIVITY_SERVICE)).getMemoryClass();
+            // 1/8 of the available mem
+            final int cacheSize = 1024 * 1024 * memClass / 8;
+            memoryCache = new LruCache(cacheSize);
+
+            mStubDrawable = context.getResources().getDrawable(R.drawable.default_icon);
+        }
+
+        public void displayImage(String url, ImageView imageView) {
+            imageViews.put(imageView, url);
+            Bitmap bitmap = null;
+            if (url != null &amp;&amp; url.length() &gt; )
+                bitmap = (Bitmap) memoryCache.get(url);
+            if (bitmap != null) {
+                //the image is in the LRU Cache, we can use it directly
+                imageView.setImageBitmap(bitmap);
+            } else {
+                //the image is not in the LRU Cache
+                //set a default drawable a search the image
+                imageView.setImageDrawable(mStubDrawable);
+                if (url != null &amp;&amp; url.length() &gt; )
+                    queuePhoto(url, imageView);
+            }
+        }
+
+        private void queuePhoto(String url, ImageView imageView) {
+                new LoadBitmapTask().execute(url, imageView);
+        }
+
+        /**
+         * Search for the image in the device, then in the web
+         * @param url
+         * @return
+         */
+        private Bitmap getBitmap(String url) {
+            Bitmap ret = null;
+            //from SD cache
+            File f = fileCache.getFile(url);
+            if (f.exists()) {
+                ret = decodeFile(f);
+                if (ret != null)
+                    return ret;
+            }
+
+            //from web
+            try {
+                //your requester will fetch the bitmap from the web and store it in the phone using the fileCache
+                ret = MyRequester.getBitmapFromWebAndStoreItInThePhone(url);    // your own requester here
+                return ret;
+            } catch ([Exception][8] ex) {
+                ex.printStackTrace();
+                return null;
+            }
+        }
+
+        //decodes image and scales it to reduce memory consumption
+        private Bitmap decodeFile(File f) {
+            Bitmap ret = null;
+            try {
+                [FileInputStream][9] is = new [FileInputStream][9](f);
+                ret = BitmapFactory.decodeStream(is, null, null);
+            } catch ([FileNotFoundException][10] e) {
+                e.printStackTrace();
+            } catch ([Exception][8] e) {
+                e.printStackTrace();
+            }
+            return ret;
+        }
+
+        private class PhotoToLoad {
+            public String url;
+            public ImageView imageView;
+
+            public PhotoToLoad(String u, ImageView i) {
+                url = u;
+                imageView = i;
+            }
+        }
+
+        private boolean imageViewReused(PhotoToLoad photoToLoad) {
+            //tag used here
+            String tag = imageViews.get(photoToLoad.imageView);
+            if (tag == null || !tag.equals(photoToLoad.url))
+                return true;
+            return false;
+        }
+
+        class LoadBitmapTask extends AsyncTask {
+            private PhotoToLoad mPhoto;
+
+            @Override
+            protected TransitionDrawable doInBackground([Object][11]... params) {
+                mPhoto = new PhotoToLoad((String) params[], (ImageView) params[1]);
+
+                if (imageViewReused(mPhoto))
+                    return null;
+                Bitmap bmp = getBitmap(mPhoto.url);
+                if (bmp == null)
+                    return null;
+                memoryCache.put(mPhoto.url, bmp);
+
+                // TransitionDrawable let you to make a crossfade animation between 2 drawables
+                // It increase the sensation of smoothness
+                TransitionDrawable td = null;
+                if (bmp != null) {
+                    Drawable[] drawables = new Drawable[2];
+                    drawables[] = mStubDrawable;
+                    drawables[1] = new BitmapDrawable(Application.getRessources(), bmp);
+                    td = new TransitionDrawable(drawables);
+                    td.setCrossFadeEnabled(true); //important if you have transparent bitmaps
+                }
+
+                return td;
+            }
+
+            @Override
+            protected void onPostExecute(TransitionDrawable td) {
+                if (imageViewReused(mPhoto)) {
+                    //imageview reused, just return
+                    return;
+                }
+                if (td != null) {
+                    // bitmap found, display it !
+                    mPhoto.imageView.setImageBitmap(drawable);
+                    mPhoto.imageView.setVisibility(View.VISIBLE);
+
+                    //a little crossfade
+                    td.startTransition(200);
+                } else {
+                    //bitmap not found, display the default drawable
+                    mPhoto.imageView.setImageDrawable(mStubDrawable);
+                }
+            }
+        }
+    }
+</code></pre>
+
+<p>FileCache:</p>
+
+<pre><code class="java">    public class FileCache {
+        private File cacheDir;
+
+        public FileCache(Context context) {
+            this(context, );
+        }
+
+        public FileCache(Context context, long evt) {
+            //Find the dir to save cached images
+            cacheDir = context.getCacheDir();
+            if (!cacheDir.exists())
+                cacheDir.mkdirs();
+        }
+
+        public File getFile(String url) {
+            return new File(cacheDir, String.valueOf(url.hashCode()));
+        }
+
+        public void clear() {
+            File[] files = cacheDir.listFiles();
+            if (files == null)
+                return;
+            for (File f : files)
+                f.delete();
+        }
+    }
+</code></pre>
+
+<p><strong><em>Note 1</em></strong>: <em>The crossfade is done with a <a href="http://developer.android.com/reference/android/graphics/drawable/TransitionDrawable.html">TransitionDrawable</a>, which give the feeling that your list scroll smoother!</em></p>
+
+<p><strong><em>Note 2</em></strong>: <em>Try to avoid the setImageResource(ind resId) as much as possible and create a default drawable when you init your imageLoader. Indeed, according to the <a href="http://developer.android.com/reference/android/widget/ImageView.html#setImageResource(int)">DOC</a>,</em></p>
+
+<blockquote><p>This does Bitmap reading and decoding on the UI thread, which can cause a latency hiccup. If that&rsquo;s a concern, consider using <code>setImageDrawable(Drawable)</code> or <code>setImageBitmap(Bitmap)</code> and <code>BitmapFactory</code> instead.</p></blockquote>
+
+<p><strong><em>Note 3</em></strong> : <em>We use the fileCache here to get bitmaps, but we store the bitmaps thanks to our requester. You can do this very easily using an InputStream and an OutputStream</em></p>
+
+<h2>II. The BlockingImageView</h2>
+
+<p>When you scroll now your list, you can notice some lags when images are displayed. This is due to the setImageDrawable(Drawable d) wich can call a requestLayout (which one can take some time).</p>
+
+<p>There is a way to block the requestLayout, pretty simple. I found it thanks to Jorim Jaggy, <a href="https://plus.google.com/113058165720861374515/posts/iTk4PjgeAWX">on this google post</a>. But look at the source code of the ImageView first:</p>
+
+<pre><code class="java">    /**
+         * Sets a drawable as the content of this ImageView.
+         * 
+         * @param drawable The drawable to set
+         */
+        public void setImageDrawable(Drawable drawable) {
+            if (mDrawable != drawable) {
+                mResource = ;
+                mUri = null;
+
+                int oldWidth = mDrawableWidth;
+                int oldHeight = mDrawableHeight;
+
+                updateDrawable(drawable);
+
+                if (oldWidth != mDrawableWidth || oldHeight != mDrawableHeight) {
+                    requestLayout();    //HERE
+                }
+                invalidate();
+            }
+        }
+</code></pre>
+
+<p>If you know that the dimension of all your images is the same, then you can block the <code>requestlayout</code>, by using a custom <code>ImageView</code> :</p>
+
+<pre><code class="java">    public class BlockingImageView extends ImageView {
+        private boolean mBlockLayout;
+
+        public BlockingImageView(Context context) {
+            super(context);
+        }
+
+        public BlockingImageView(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        public BlockingImageView(Context context, AttributeSet attrs, int defStyle) {
+            super(context, attrs, defStyle);
+        }
+
+        @Override
+        public void requestLayout() {
+            if (!mBlockLayout) {
+                super.requestLayout();
+            }
+        }
+
+        @Override
+        public void setImageResource(int resId) {
+            mBlockLayout = true;
+            super.setImageResource(resId);
+            mBlockLayout = false;
+        }
+
+        @Override
+        public void setImageURI(Uri uri) {
+            mBlockLayout = true;
+            super.setImageURI(uri);
+            mBlockLayout = false;
+        }
+
+        @Override
+        public void setImageDrawable(Drawable drawable) {
+            mBlockLayout = true;
+            super.setImageDrawable(drawable);
+            mBlockLayout = false;
+        }
+    }
+</code></pre>
+
+<p>Don’t forget to modify the xml of your elements to add your custom <code>ImageView</code>.</p>
+
+<p>You should now have a smoothy listView with images.</p>
+
+<p>Hope you enjoyed, do not hesitate to leave comments and share it!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[ListView optimisations : Part 1 (the ViewHolder)]]></title>
+    <link href="http://antoine-merle.com/listview-optimisations-part-1-the-viewholder/"/>
+    <updated>2012-11-20T00:00:00+01:00</updated>
+    <id>http://antoine-merle.com/listview-optimisations-part-1-the-viewholder</id>
+    <content type="html"><![CDATA[<h1></h1>
+
+<p>When you develop on Android, you will probably need to make lists pretty quickly. However, it can be complicated to understand all the mecanisms when you are a beginner. This serie of posts aims to give you tips if you want to increase the smoothness in your lists.</p>
+
+<p>This first post is a basic one which talk about a well known tip, called ViewHolder. <!-- more -->This is absolutely essential if you want to have a viable list. But we must first understand how it works.</p>
+
+<p>A list is composed by elements displayed in views, which ones are declared in xml files (generally). Usually, a list is composed by elements whose views are the same, only the content change. That’s why we use the same view for all the elements. The role of the adapter is to provide views to the list. It has to create and modify their contents.<br/>
+Here is an example of a basic custom adapter, providing elements with a name and a description :</p>
+
+<pre><code class="java">    public class MyAdapter extends BaseAdapter {
+
+        private LayoutInflater mLayoutInflater;
+        private List mData;
+
+        public MyAdapter(Context context, List data){
+            mData = data;
+            mLayoutInflater = LayoutInflater.from(context);
+        }
+
+        @Override
+        public int getCount() {
+            return mData == null ?  : mData.size();
+        }
+
+        @Override
+        public MyPojo getItem(int position) {
+            return mData.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View view, ViewGroup parent) {
+
+            //This is bad, do not do this at home
+            View vi = mLayoutInflater.inflate(R.layout.item, parent, false);
+
+            TextView tvName = (TextView) vi.findViewById(R.id.textView_item_name);
+            TextView tvDescription = (TextView) vi.findViewById(R.id.textView_item_description);
+
+            MyPojo item = getItem(position);
+
+            tvName.setText(item.getName());
+            tvDescription.setText(item.getDescription());
+
+            return vi;
+        }
+    }
+</code></pre>
+
+<p>That is the code we could make when we don’t know that listviews recycle their views. Indeed, when you scroll down, the views disappearing on the top are reused to display items on the bottom of your list. I hope that this is clear because it’s very important :p. As a consequence, we will tag our views in order to avoid to inflate views that already exists (this operation take long time).</p>
+
+<p>We will write a class (called ViewHolder) in which references between the widgets will be saved :</p>
+
+<pre><code class="java">static class ViewHolder{
+    TextView tvName;
+    TextView tvDescription;
+}
+</code></pre>
+
+<p>And the adapter :</p>
+
+<pre><code class="java">@Override
+public View getView(int position, View view, ViewGroup parent) {
+
+    View vi = view;             //trying to reuse a recycled view
+    ViewHolder holder = null;
+
+    if (vi == null) {
+        //The view is not a recycled one: we have to inflate
+        vi = mLayoutInflater.inflate(R.layout.item, parent, false);
+        holder = new ViewHolder();
+
+        holder.tvName = (TextView) vi.findViewById(R.id.textView_item_name);
+        holder.tvDescription = (TextView) vi.findViewById(R.id.textView_item_description);
+        vi.setTag(holder);
+    } else {
+        // View recycled !
+        // no need to inflate
+        // no need to findViews by id
+        holder = (ViewHolder) vi.getTag();
+    }
+
+    MyPojo item = getItem(position);
+
+    holder.tvName.setText(item.getName());
+    holder.tvDescription.setText(item.getDescription());
+
+    return vi;
+}
+</code></pre>
+
+<p>If you want to add other widgets in your elements (an image for example), you will have to add them in the ViewHolder too.</p>
+
+<p>That’s all I’ll talk next time about the way you can optimize your images in your lists (LRUCache, etc.).</p>
+]]></content>
+  </entry>
+  
+</feed>

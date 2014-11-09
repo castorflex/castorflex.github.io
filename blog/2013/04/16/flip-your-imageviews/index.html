@@ -1,0 +1,391 @@
+
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Flip your ImageViews - An Android Dev Blog</title>
+	<meta name="author" content="Antoine Merle">
+
+	
+	<meta name="description" content="This tutorial will show you how to flip your ImageViews on Android.">
+	<meta name="keywords" content="android, flip, imageview, drawable, view, image view, image, animation, flipimageview, image view animation, imageview animation">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="http://feeds.feedburner.com/AnAndroidDevBlog" rel="alternate" title="An Android Dev Blog" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://antoine-merle.com/blog/2013/04/16/flip-your-imageviews/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<link href="/stylesheets/font-awesome.min.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<link href='http://fonts.googleapis.com/css?family=Nunito:400,300,700' rel='stylesheet' type='text/css'>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+  
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-32954204-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><div class="profilepic">
+	
+	<a href="/"><img src="http://www.gravatar.com/avatar/4e3c42cc88b76f693215b1c47dd3cca6?s=160" alt="Profile Picture" style="width: 160px;" /></a>
+	
+</div>
+
+<nav id="main-nav">
+
+<a class="author" href="/">Antoine Merle</a>
+
+
+<section class="aboutme">
+  <p>
+    A blog about Android development, again.
+  </p>
+</section>
+
+<ul>
+    <li><a href="/">Blog</a></li>
+    <li>-</li>
+    <li><a href="/about">About</a></li>
+    <li>-</li>
+    <li><a href="/blog/archives">Archives</a></li>
+</ul></nav>
+
+<!-- Place this tag where you want the widget to render. -->
+<div class="g-follow" data-annotation="bubble" data-height="24" data-href="//plus.google.com/u/0/108486473528609847558" data-rel="author"></div>
+
+<!-- Place this tag after the last widget tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+
+<nav id="sub-nav">
+	<div class="social">
+		
+		
+
+		
+			<a class="twitter" href="http://twitter.com/antoine_merle" title="Twitter">Twitter</a>
+		
+		
+			<a class="github" href="https://github.com/Castorflex" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+    	
+    	
+			<a class="rss" href="http://feeds.feedburner.com/AnAndroidDevBlog" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+
+<!-- Place this tag after the last widget tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-16T20:06:00+02:00" data-updated="true" itemprop="datePublished"></time></div>
+	<h1 class="title" itemprop="name">Flip Your ImageViews</h1>
+	<div class="entry-content" itemprop="articleBody"><p>This post will be cut in two parts. In the first part, I&rsquo;ll present my small android library <a href="https://github.com/castorflex/FlipImageView">FlipImageView</a> which allows you to create easily an <code>ImageView</code> which can turn into another <code>Drawable</code>. Then I&rsquo;ll show you how the animation is performed and how you can modify it.</p>
+
+<p>You can download a sample app <a href="https://play.google.com/store/apps/details?id=fr.castorflex.android.flipimageview">on the store</a> if you want to see what it looks like.</p>
+
+<!-- more -->
+
+
+<h2>FlipImageView Library</h2>
+
+<p>As I needed it, I recently created a very small lib called <code>FlipImageView</code> available on <a href="https://github.com/castorflex/FlipImageView">Github</a>. This lib is based on <a href="https://code.google.com/p/myandroidwidgets/source/browse/trunk/FlipAnimatorExample/src/com/beanie/examples/animation/FlipAnimator/FlipAnimator.java">FlipAnimator</a>, made by Coomar, so all credits goes to him.</p>
+
+<p><code>FlipImageView extends ImageView</code>, that means if you have your own custom <code>ImageView</code>, I suggest you to extend <code>FlipImageView</code>, or look at the source code and take the animation part.</p>
+
+<p>There are two ways to create your FlipImageView:</p>
+
+<ul>
+<li>Via XML</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;fr.castorflex.android.flipimageview.library.FlipImageView</span>
+</span><span class='line'>   <span class="na">xmlns:fiv=</span><span class="s">&quot;http://schemas.android.com/apk/res-auto&quot;</span>
+</span><span class='line'>   <span class="na">android:id=</span><span class="s">&quot;@+id/imageview&quot;</span>
+</span><span class='line'>   <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+</span><span class='line'>   <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span>
+</span><span class='line'>   <span class="na">android:src=</span><span class="s">&quot;@drawable/YOUR_DEFAULT_DRAWABLE&quot;</span>
+</span><span class='line'>   <span class="na">fiv:flipDrawable=</span><span class="s">&quot;@drawable/YOUR_FLIPPED_DRAWABLE&quot;</span>
+</span><span class='line'>   <span class="na">fiv:flipDuration=</span><span class="s">&quot;YOUR_DURATION_IN_MS&quot;</span>
+</span><span class='line'>   <span class="na">fiv:flipInterpolator=</span><span class="s">&quot;@android:anim/YOUR_INTERPOLATOR&quot;</span>
+</span><span class='line'>   <span class="na">fiv:flipRotations=</span><span class="s">&quot;none|x|y|z&quot;</span>
+</span><span class='line'>   <span class="na">fiv:isAnimated=</span><span class="s">&quot;true|false&quot;</span>
+</span><span class='line'>   <span class="na">fiv:isFlipped=</span><span class="s">&quot;true|false&quot;</span>
+</span><span class='line'>   <span class="na">fiv:reverseRotation=</span><span class="s">&quot;true|false&quot;</span><span class="nt">/&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<ul>
+<li>Or programmatically</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">//Standard way</span>
+</span><span class='line'><span class="n">FlipImageView</span> <span class="n">fiv</span> <span class="o">=</span> <span class="k">new</span> <span class="n">FlipImageView</span><span class="o">(</span><span class="n">mContext</span><span class="o">);</span>
+</span><span class='line'><span class="n">fiv</span><span class="o">.</span><span class="na">setDrawable</span><span class="o">(</span><span class="n">mDrawable</span><span class="o">);</span>    <span class="c1">//Note that this is different from setImageDrawable(...)</span>
+</span><span class='line'><span class="n">fiv</span><span class="o">.</span><span class="na">setFlippedDrawable</span><span class="o">(</span><span class="n">mDrawable</span><span class="o">);</span>
+</span><span class='line'><span class="n">fiv</span><span class="o">.</span><span class="na">setIsFlipped</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+</span><span class='line'><span class="c1">//etc.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong><em>Note:</em></strong> <em>setDrawable is different from setImageDrawable which one will set directly the drawable to the ImageView.</em></p>
+
+<p>You can disable the flip animation by calling <code>setAnimated(false)</code>.</p>
+
+<p>The flip animation will be launched each time you click on the image. You can of course call it programmatically, with <code>toggleFlip()</code> method or <code>setFlipped(boolean flipped)</code> method. You can also Override onClick or set another <code>View.OnClickListener</code> if you do not want the image view to flip when clicked.</p>
+
+<p>You can set a <code>OnFlipListener</code> to your FlipImageView. Three events will be triggered:</p>
+
+<ol>
+<li><code>onClick(FlipImageView flipImageView)</code>: called when the imageView is clicked</li>
+<li><code>onFlipStart(FlipImageView flipImageView)</code> : called at the beginning of the flip animation</li>
+<li><code>onFlipEnd(FlipImageView flipImageView)</code>: called at the end of the animation</li>
+</ol>
+
+
+<p><strong><em>Note:</em></strong> <em>onFlipStart and OnFlipEnd won&rsquo;t be called if you disabled the flip animation.</em></p>
+
+<p>You can also reverse the animation, for example if you want your ImageView to flip in the other direction, to make a &ldquo;flip back&rdquo; transition. To do that, just call <code>setRotationReversed(true)</code> every time you flip your image.</p>
+
+<p>You can enable/disable x, y and z rotation axis via xml or programmatically too.</p>
+
+<p>I strongly recommend you to play with existing <code>interpolators</code> (bounce/overshoot are funny :p) or to create new ones. You could be surprised by the effect :p</p>
+
+<h2>How does this work?</h2>
+
+<p>Here is the transformation part:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">applyTransformation</span><span class="o">(</span><span class="kt">float</span> <span class="n">interpolatedTime</span><span class="o">,</span> <span class="n">Transformation</span> <span class="n">t</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// Angle around the y-axis of the rotation at the given time. It is</span>
+</span><span class='line'>    <span class="c1">// calculated both in radians and in the equivalent degrees.</span>
+</span><span class='line'>    <span class="kd">final</span> <span class="kt">double</span> <span class="n">radians</span> <span class="o">=</span> <span class="n">Math</span><span class="o">.</span><span class="na">PI</span> <span class="o">*</span> <span class="n">interpolatedTime</span><span class="o">;</span>
+</span><span class='line'>    <span class="kt">float</span> <span class="n">degrees</span> <span class="o">=</span> <span class="o">(</span><span class="kt">float</span><span class="o">)</span> <span class="o">(</span><span class="mf">180.0</span> <span class="o">*</span> <span class="n">radians</span> <span class="o">/</span> <span class="n">Math</span><span class="o">.</span><span class="na">PI</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Once we reach the midpoint in the animation, we need to hide the</span>
+</span><span class='line'>    <span class="c1">// source view and show the destination view. We also need to change</span>
+</span><span class='line'>    <span class="c1">// the angle by 180 degrees so that the destination does not come in</span>
+</span><span class='line'>    <span class="c1">// flipped around.</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">interpolatedTime</span> <span class="o">&gt;=</span> <span class="mf">0.5f</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">degrees</span> <span class="o">-=</span> <span class="mi">180</span><span class="o">.</span><span class="na">f</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(!</span><span class="n">visibilitySwapped</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">setImageDrawable</span><span class="o">(</span><span class="n">toDrawable</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">visibilitySwapped</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">mIsRotationReversed</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">degrees</span> <span class="o">=</span> <span class="o">-</span><span class="n">degrees</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">final</span> <span class="n">Matrix</span> <span class="n">matrix</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="na">getMatrix</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">camera</span><span class="o">.</span><span class="na">save</span><span class="o">();</span>
+</span><span class='line'>    <span class="c1">//We make a small translation in z axis, this is a cool effect :)</span>
+</span><span class='line'>    <span class="c1">//Note that you can custom this too, by making a translation in the </span>
+</span><span class='line'>    <span class="c1">// other direction for example, to make the image move in the foreground</span>
+</span><span class='line'>    <span class="n">camera</span><span class="o">.</span><span class="na">translate</span><span class="o">(</span><span class="mf">0.0f</span><span class="o">,</span> <span class="mf">0.0f</span><span class="o">,</span> <span class="o">(</span><span class="kt">float</span><span class="o">)</span> <span class="o">(</span><span class="mf">150.0</span> <span class="o">*</span> <span class="n">Math</span><span class="o">.</span><span class="na">sin</span><span class="o">(</span><span class="n">radians</span><span class="o">)));</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//rotations</span>
+</span><span class='line'>    <span class="n">camera</span><span class="o">.</span><span class="na">rotateX</span><span class="o">(</span><span class="n">mIsRotationXEnabled</span> <span class="o">?</span> <span class="n">degrees</span> <span class="o">:</span> <span class="mi">0</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">camera</span><span class="o">.</span><span class="na">rotateY</span><span class="o">(</span><span class="n">mIsRotationYEnabled</span> <span class="o">?</span> <span class="n">degrees</span> <span class="o">:</span> <span class="mi">0</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">camera</span><span class="o">.</span><span class="na">rotateZ</span><span class="o">(</span><span class="n">mIsRotationZEnabled</span> <span class="o">?</span> <span class="n">degrees</span> <span class="o">:</span> <span class="mi">0</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">camera</span><span class="o">.</span><span class="na">getMatrix</span><span class="o">(</span><span class="n">matrix</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">camera</span><span class="o">.</span><span class="na">restore</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">matrix</span><span class="o">.</span><span class="na">preTranslate</span><span class="o">(-</span><span class="n">centerX</span><span class="o">,</span> <span class="o">-</span><span class="n">centerY</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">matrix</span><span class="o">.</span><span class="na">postTranslate</span><span class="o">(</span><span class="n">centerX</span><span class="o">,</span> <span class="n">centerY</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Well, I think the code is pretty clear (I added some comments too). Do not hesitate to custom the animation by trying some interpolators or modifying directly the <code>applyTransformation</code> method!</p>
+
+<h2>Conclusion</h2>
+
+<p>That was a pretty short post to introduce my lib, but I&rsquo;m sure some guys will be happy to discover that kind of small tricks which can make your app better. But however, please do not make all your controls animated, just when needed, or your app will be really annoying.</p>
+
+<p>Do not hesitate to contribute to the <a href="https://github.com/castorflex/FlipImageView">Lib</a> or to this <a href="https://github.com/castorflex/castorflex-blog/blob/master/source/_posts/2013-04-16-flip-your-imageviews.markdown">article</a> by leaving comments or making pull requests. Thanks!</p>
+</div>
+
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet" tw:via="antoine_merle" tw:hashtags="androiddev"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite">
+
+<script type="text/javascript">
+      var disqus_shortname = 'castorflex';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://antoine-merle.com/blog/2013/04/16/flip-your-imageviews/';
+        var disqus_url = 'http://antoine-merle.com/blog/2013/04/16/flip-your-imageviews/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//go.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+</div>
+</section>
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Antoine Merle
+
+
+Design credit: <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a></footer>
+		</div>
+	</div>
+</body>
+</html>

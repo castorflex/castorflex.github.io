@@ -1,0 +1,1120 @@
+
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>Making that Google Plus profile screen - An Android Dev Blog</title>
+	<meta name="author" content="Antoine Merle">
+
+	
+	<meta name="description" content="We will see a way to make the Android app's Google plus profile screen. List HeaderView, sticky header, parallax, imageview, rounded avatar, and &hellip;">
+	<meta name="keywords" content="android, parallax, imageview, listview, griview, stick, sticky header, google plus profile, polish, color filter, colorfilter, smooth">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="http://feeds.feedburner.com/AnAndroidDevBlog" rel="alternate" title="An Android Dev Blog" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://antoine-merle.com/blog/2013/10/04/making-that-google-plus-profile-screen/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<link href="/stylesheets/font-awesome.min.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<link href='http://fonts.googleapis.com/css?family=Nunito:400,300,700' rel='stylesheet' type='text/css'>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+  
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-32954204-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><div class="profilepic">
+	
+	<a href="/"><img src="http://www.gravatar.com/avatar/4e3c42cc88b76f693215b1c47dd3cca6?s=160" alt="Profile Picture" style="width: 160px;" /></a>
+	
+</div>
+
+<nav id="main-nav">
+
+<a class="author" href="/">Antoine Merle</a>
+
+
+<section class="aboutme">
+  <p>
+    A blog about Android development, again.
+  </p>
+</section>
+
+<ul>
+    <li><a href="/">Blog</a></li>
+    <li>-</li>
+    <li><a href="/about">About</a></li>
+    <li>-</li>
+    <li><a href="/blog/archives">Archives</a></li>
+</ul></nav>
+
+<!-- Place this tag where you want the widget to render. -->
+<div class="g-follow" data-annotation="bubble" data-height="24" data-href="//plus.google.com/u/0/108486473528609847558" data-rel="author"></div>
+
+<!-- Place this tag after the last widget tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+
+<nav id="sub-nav">
+	<div class="social">
+		
+		
+
+		
+			<a class="twitter" href="http://twitter.com/antoine_merle" title="Twitter">Twitter</a>
+		
+		
+			<a class="github" href="https://github.com/Castorflex" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+    	
+    	
+			<a class="rss" href="http://feeds.feedburner.com/AnAndroidDevBlog" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+
+<!-- Place this tag after the last widget tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-04T06:54:00+02:00" data-updated="true" itemprop="datePublished"></time></div>
+	<h1 class="title" itemprop="name">Making That Google Plus Profile Screen</h1>
+	<div class="entry-content" itemprop="articleBody"><p>We will see here a way to make the Google Plus profile screen. I find this screen pretty interesting (although it suffers from some minor bugs), and wanted to try to find a way to do that.</p>
+
+<p><img class="center" src="/images/screen_gplus_global.png"></p>
+
+<p><em><strong>Note</strong>: I won&rsquo;t talk about the weird bottom bar you have to use if you want to make a new post. I hate that &lsquo;quick return&rsquo; bar</em></p>
+
+<p>I&rsquo;ll cut this post in three parts:</p>
+
+<ul>
+<li>The view hierarchy</li>
+<li>The parallax effect</li>
+<li>The sticky tabs (tabs about/posts/videos, &hellip;)</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h1>The View Hierarchy</h1>
+
+<h2>The Container</h2>
+
+<p><img class="right" src="/images/screen_gplus_views.png" title="My design skills in action" ></p>
+
+<p>Seems obvious we have a list at the bottom of the screen. The question is: <em>what is this header?</em></p>
+
+<p>I see 2 options here:</p>
+
+<ol>
+<li>The header is not a header of the list. That means there is a FrameLayout (or anything else) containing a header and a list (with a big padding and <code>clipToPadding</code> set to false).</li>
+<li>The header is included in the gridview as a HeaderView.</li>
+</ol>
+
+
+<p>Actually, there are some hints that indicate us that the second one is more plausible:</p>
+
+<ul>
+<li>We can scroll by touching <strong>anywhere</strong> in the header. Hmm ok but we also could with custom views. We would probably have to change the default behavior of the tabs by overriding the <code>onInterceptTouchEvent</code> and <code>onTouchEvent</code> methods.</li>
+<li>There is the edge effect at the top of the list. However, we could put the listView over the header in order to see the edge effect. The sticky tabs would also be visible because they are drawn after the listview&rsquo;s <code>draw</code>. (See part 3).</li>
+<li>I think this is easier to do this way (especially if you want to be compatible pre ICS).</li>
+</ul>
+
+
+<p>The main xml should look like that:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;GridView</span> <span class="err">...</span><span class="nt">/&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Hmm ok it&rsquo;s a <code>StaggeredGridView</code>, but it&rsquo;s basically the same. Don&rsquo;t blame me if I call that a ListView or a GridView thereafter.</p>
+
+<h2>The header</h2>
+
+<p><img class="center" src="/images/screen_gplus_header_overdraw.png"></p>
+
+<p>Take a look at the overdraw. The header image is light red. That means pixels are drawn four times. ouch. I&rsquo;m sorry but I guess it should be blue, right? I mean, there is the activity&rsquo;s background, and&hellip; what else? There is obviously a perf issue here.</p>
+
+<p><em><strong>Note</strong>: If you want to know more about overdraws, read <a href="http://www.curious-creature.org/2012/12/01/android-performance-case-study/">this post</a> by <a href="http://twitter.com/romainguy">Romain Guy</a>.</em></p>
+
+<p>Here is an example of hierarchy you could have:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="c">&lt;!-- in a real application you should use styles and dimens... --&gt;</span>
+</span><span class='line'><span class="nt">&lt;RelativeLayout</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
+</span><span class='line'>    <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+</span><span class='line'>    <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;ImageView</span>
+</span><span class='line'>        <span class="na">android:id=</span><span class="s">&quot;@+id/header_imageview&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_height=</span><span class="s">&quot;150dp&quot;</span>
+</span><span class='line'>        <span class="na">android:scaleType=</span><span class="s">&quot;centerCrop&quot;</span>
+</span><span class='line'>        <span class="na">android:adjustViewBounds=</span><span class="s">&quot;true&quot;</span>
+</span><span class='line'>         <span class="nt">/&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;LinearLayout</span>
+</span><span class='line'>        <span class="na">android:id=</span><span class="s">&quot;@+id/informations_container&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+</span><span class='line'>        <span class="na">android:orientation=</span><span class="s">&quot;vertical&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_below=</span><span class="s">&quot;@+id/header_imageview&quot;</span>
+</span><span class='line'>        <span class="na">android:gravity=</span><span class="s">&quot;center&quot;</span>
+</span><span class='line'>        <span class="na">android:paddingTop=</span><span class="s">&quot;32dp&quot;</span>
+</span><span class='line'>        <span class="na">android:paddingBottom=</span><span class="s">&quot;32dp&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>        <span class="nt">&lt;TextView</span>
+</span><span class='line'>            <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+</span><span class='line'>            <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+</span><span class='line'>            <span class="na">android:text=</span><span class="s">&quot;@string/header_name&quot;</span>
+</span><span class='line'>            <span class="na">android:textStyle=</span><span class="s">&quot;bold&quot;</span>
+</span><span class='line'>            <span class="na">android:textSize=</span><span class="s">&quot;17dp&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nt">&lt;TextView</span>
+</span><span class='line'>            <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+</span><span class='line'>            <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+</span><span class='line'>            <span class="na">android:layout_marginTop=</span><span class="s">&quot;4dp&quot;</span>
+</span><span class='line'>            <span class="na">android:gravity=</span><span class="s">&quot;center&quot;</span>
+</span><span class='line'>            <span class="na">android:textColor=</span><span class="s">&quot;#FF707070&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nt">&lt;TextView</span>
+</span><span class='line'>            <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+</span><span class='line'>            <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+</span><span class='line'>            <span class="na">android:layout_marginTop=</span><span class="s">&quot;8dp&quot;</span>
+</span><span class='line'>            <span class="na">android:textColor=</span><span class="s">&quot;#FF909090&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;/LinearLayout&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;HorizontalScrollView</span>
+</span><span class='line'>        <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+</span><span class='line'>        <span class="na">android:scrollbars=</span><span class="s">&quot;none&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_below=</span><span class="s">&quot;@+id/informations_container&quot;</span>
+</span><span class='line'>        <span class="na">android:background=</span><span class="s">&quot;#FFF0F0F0&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nt">&lt;LinearLayout</span>
+</span><span class='line'>            <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+</span><span class='line'>            <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+</span><span class='line'>            <span class="na">android:orientation=</span><span class="s">&quot;horizontal&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="c">&lt;!-- Here are the tabs, Just TextViews with a selector and a clickListener... --&gt;</span>
+</span><span class='line'>            <span class="c">&lt;!-- There is also two views at each edge with a gradient drawable making the fade effect. But I find this pretty ugly. --&gt;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nt">&lt;/LinearLayout&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/HorizontalScrollView&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c">&lt;!-- cheat code: negative margin --&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;ImageView</span>
+</span><span class='line'>        <span class="na">android:layout_width=</span><span class="s">&quot;75dp&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_height=</span><span class="s">&quot;75dp&quot;</span>
+</span><span class='line'>        <span class="na">android:src=</span><span class="s">&quot;@drawable/avatar&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_centerHorizontal=</span><span class="s">&quot;true&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_above=</span><span class="s">&quot;@+id/informations_container&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_marginBottom=</span><span class="s">&quot;-16dp&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;/RelativeLayout&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This is basically all concerning the view hierarchy.</p>
+
+<p><em><strong>Note:</strong> If you want to know how to make the rounded avatar, I strongly suggest you to read <a href="http://evel.io/2013/07/21/rounded-avatars-in-android/">an excellent post</a> by <a href="https://plus.google.com/u/0/103638111379552295023/posts">Evelio Tarazona Cáceres</a>.</em></p>
+
+<h1>The Parallax Effect</h1>
+
+<p>There is a nice parallax effect on the header image. Basically, when you scroll up your list, the image has to scroll by <code>0.5 * translationY</code> instead of <code>1 * translationY</code>. You cannot cancel the translation on the parent, because it&rsquo;s part of the GridView so you will have to translate the image by <code>-0.5 * translationY</code>.</p>
+
+<p>Just set a <code>OnScrollListener</code> like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">onScroll</span><span class="o">(</span><span class="n">AbsListView</span> <span class="n">view</span><span class="o">,</span> <span class="kt">int</span> <span class="n">firstVisibleItem</span><span class="o">,</span> <span class="kt">int</span> <span class="n">visibleItemCount</span><span class="o">,</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">totalItemCount</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">if</span><span class="o">(</span><span class="n">visibleItemCount</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="k">return</span><span class="o">;</span>
+</span><span class='line'>  <span class="k">if</span><span class="o">(</span><span class="n">firstVisibleItem</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="k">return</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">mImageView</span><span class="o">.</span><span class="na">setTranslationY</span><span class="o">(-</span><span class="n">mListView</span><span class="o">.</span><span class="na">getChildAt</span><span class="o">(</span><span class="mi">0</span><span class="o">).</span><span class="na">getTop</span><span class="o">()</span> <span class="o">/</span> <span class="mi">2</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This would work. BUT:</p>
+
+<ol>
+<li>You don&rsquo;t support pre API14 (we don&rsquo;t care, but the G+ app does)</li>
+<li>If you use a TranslateAnimation for pre ICS devices, you will have an overdraw issue.</li>
+</ol>
+
+
+<p>You just need to draw the visible part of the bitmap. Let&rsquo;s create a custom ImageView, define a <code>setParallaxTranslation</code> method and override the <code>draw</code> method:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">setCurrentTranslation</span><span class="o">(</span><span class="kt">int</span> <span class="n">currentTranslation</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">mCurrentTranslation</span> <span class="o">=</span> <span class="n">currentTranslation</span><span class="o">;</span>
+</span><span class='line'>  <span class="n">invalidate</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">draw</span><span class="o">(</span><span class="n">Canvas</span> <span class="n">canvas</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">canvas</span><span class="o">.</span><span class="na">save</span><span class="o">();</span>
+</span><span class='line'>  <span class="n">canvas</span><span class="o">.</span><span class="na">translate</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="o">-</span><span class="n">mCurrentTranslation</span> <span class="o">/</span> <span class="mi">2</span><span class="o">)</span>  <span class="o">;</span>
+</span><span class='line'>  <span class="kd">super</span><span class="o">.</span><span class="na">draw</span><span class="o">(</span><span class="n">canvas</span><span class="o">);</span>
+</span><span class='line'>  <span class="n">canvas</span><span class="o">.</span><span class="na">restore</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then change the call from <code>mImageView.setTranslationY(-mListView.getChildAt(0).getTop() / 2);</code> to <code>mImageView.setCurrentTranslation(mListView.getChildAt(0).getTop());</code></p>
+
+<p><em><strong>EXTRA 1</strong>:</em></p>
+
+<p>You can add a <code>ColorFilter</code> to add a nice effect on the ImageView:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">setCurrentTranslation</span><span class="o">(</span><span class="kt">int</span> <span class="n">currentTranslation</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">mCurrentTranslation</span> <span class="o">=</span> <span class="n">currentTranslation</span><span class="o">;</span>
+</span><span class='line'>    <span class="kt">float</span> <span class="n">ratio</span> <span class="o">=</span>  <span class="o">-</span><span class="n">mCurrentTranslation</span> <span class="o">/</span> <span class="o">(</span><span class="kt">float</span><span class="o">)</span><span class="n">getHeight</span><span class="o">();</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">color</span> <span class="o">=</span> <span class="n">Color</span><span class="o">.</span><span class="na">argb</span><span class="o">((</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="n">fMAX_COLORFILTER_ALPHA</span> <span class="o">*</span> <span class="n">ratio</span><span class="o">),</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+</span><span class='line'>    <span class="n">setColorFilter</span><span class="o">(</span><span class="n">color</span><span class="o">,</span> <span class="n">PorterDuff</span><span class="o">.</span><span class="na">Mode</span><span class="o">.</span><span class="na">SRC_ATOP</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>With this, the ImageView will be darker when you scroll.</p>
+
+<p><em><strong>EXTRA 2</strong>: If you want to make more parallax stuff on your apps, take a look at the <a href="https://github.com/chrisjenx/Paralloid">Paralloid library</a> by <a href="https://twitter.com/chrisjenx">Christopher Jenkins</a>.</em></p>
+
+<h1>The Sticky Header</h1>
+
+<p>Firstly, I would like to thank <a href="http://flavienlaurent.com">Flavien Laurent</a> who helped me a lot for this part!</p>
+
+<p><em><strong>Note</strong>: The tabs are sticky and appear over the listView. That means this View is drawn over the GridView.</em></p>
+
+<p>There are many ways to stick a header, and the simplest is to support only API14+ devices, which gives access to operations on Views like <code>View#setTranslationX/Y</code>.</p>
+
+<h3>1st solution: The tabs are not part of the header</h3>
+
+<p>This seems to be the simplest way to do it, but this won&rsquo;t work very well on preICS devices (who cares?).</p>
+
+<p>You activity is composed of a FrameLayout containing a <code>ListView</code> and the sticky <code>HorizontalScrollView</code>.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;FrameLayout</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
+</span><span class='line'>    <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+</span><span class='line'>    <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;ListView</span>
+</span><span class='line'>        <span class="na">android:id=</span><span class="s">&quot;@+id/listview&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;include</span>
+</span><span class='line'>        <span class="na">layout=</span><span class="s">&quot;@layout/stickyheader&quot;</span>
+</span><span class='line'>        <span class="na">android:id=</span><span class="s">&quot;@+id/stickyheader&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;/FrameLayout&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The <code>ListView</code> will contain the header, containing a dummy view. This view needs to has the same height as your tabs.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;RelativeLayout</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
+</span><span class='line'>    <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+</span><span class='line'>    <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;fr.castorflex.android.googleplusprofilepageapp.ParallaxImageView</span> <span class="err">...</span> <span class="nt">/&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;LinearLayout</span> <span class="err">...</span> <span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;TextView</span> <span class="err">...</span> <span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;TextView</span> <span class="err">...</span> <span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;TextView</span> <span class="err">...</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/LinearLayout&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c">&lt;!-- dummy view; the sticky header will be positionned here--&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;View</span>
+</span><span class='line'>        <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_height=</span><span class="s">&quot;48dp&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;ImageView</span> <span class="err">...</span> <span class="nt">/&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;/RelativeLayout&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now the only thing you need is to translate your sticky view:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">mListView</span> <span class="o">=</span> <span class="o">(</span><span class="n">StickyListView</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">listview</span><span class="o">);</span>
+</span><span class='line'><span class="n">mStickyHeader</span> <span class="o">=</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">header</span><span class="o">);</span>
+</span><span class='line'><span class="n">mHeader</span> <span class="o">=</span> <span class="n">LayoutInflater</span><span class="o">.</span><span class="na">from</span><span class="o">(</span><span class="k">this</span><span class="o">).</span><span class="na">inflate</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">header</span><span class="o">,</span> <span class="n">mListView</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+</span><span class='line'><span class="n">mListView</span><span class="o">.</span><span class="na">addHeaderView</span><span class="o">(</span><span class="n">mHeader</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">mListView</span><span class="o">.</span><span class="na">setOnScrollListener</span><span class="o">(</span><span class="k">new</span> <span class="n">AbsListView</span><span class="o">.</span><span class="na">OnScrollListener</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">//...</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onScroll</span><span class="o">(</span><span class="n">AbsListView</span> <span class="n">view</span><span class="o">,</span> <span class="kt">int</span> <span class="n">firstVisibleItem</span><span class="o">,</span> <span class="kt">int</span> <span class="n">visibleItemCount</span><span class="o">,</span> <span class="kt">int</span> <span class="n">totalItemCount</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">visibleItemCount</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="k">return</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kt">int</span> <span class="n">top</span> <span class="o">=</span> <span class="n">mHeader</span><span class="o">.</span><span class="na">getTop</span><span class="o">();</span>
+</span><span class='line'>        <span class="kt">int</span> <span class="n">tabsHeight</span> <span class="o">=</span> <span class="n">mStickyHeader</span><span class="o">.</span><span class="na">getMeasuredHeight</span><span class="o">();</span>
+</span><span class='line'>        <span class="kt">int</span> <span class="n">headerViewHeight</span> <span class="o">=</span> <span class="n">mHeader</span><span class="o">.</span><span class="na">getMeasuredHeight</span><span class="o">();</span>
+</span><span class='line'>        <span class="kt">int</span> <span class="n">delta</span> <span class="o">=</span> <span class="n">headerViewHeight</span> <span class="o">-</span> <span class="n">tabsHeight</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">mStickyHeader</span><span class="o">.</span><span class="na">setTranslationY</span><span class="o">(</span><span class="n">Math</span><span class="o">.</span><span class="na">max</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">delta</span> <span class="o">+</span> <span class="n">top</span><span class="o">));</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you want to make it compatible preICS, do not use NineOldAndroids. NineOldAndroids is a wrapper and will use preICS animations. That means the draw of the view will be translated, but the touch events won&rsquo;t be.</p>
+
+<p><em>e.g. Imagine you have a button in 0,0 and you translate it in 150,150 with a <code>TranslateAnimation</code>. You will notice that if you click on 150,150 the button won&rsquo;t be clicked but if you click on 0,0 the event will be called.</em></p>
+
+<p>The only way to move your view preICS is to play with the margins. BUT you will have to call <code>requestLayout()</code> each time you set the new topMargin&rsquo;s value. If you do that, you will notice lags. <a href="https://github.com/droidcon/iosched/blob/DroidconUK2013/android/src/main/java/com/funkyandroid/droidcon/uk/iosched/ui/SessionDetailFragment.java#L222">Follow this link for an example</a></p>
+
+<h3>2nd solution: Dynamically change the parent of your stickyHeader view</h3>
+
+<p>In this solution, the tabs are part of the ListView&rsquo;s header, until we need to stick them.
+This solution is better for the preICS devices, but requestLayout() will be called each time we change the parent (as we remove the view and then add it in the FrameLayout, <code>requestLayout()</code> will be called twice).</p>
+
+<p>Here is the new Header View:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;RelativeLayout</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
+</span><span class='line'>    <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+</span><span class='line'>    <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;fr.castorflex.android.googleplusprofilepageapp.ParallaxImageView</span> <span class="err">...</span> <span class="nt">/&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;LinearLayout</span> <span class="err">...</span> <span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;TextView</span> <span class="err">...</span> <span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;TextView</span> <span class="err">...</span> <span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;TextView</span> <span class="err">...</span> <span class="nt">/&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/LinearLayout&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c">&lt;!-- we add one more container to facilitate the add/remove view --&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;FrameLayout</span> <span class="na">android:id=</span><span class="s">&quot;@+id/tabs_container&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_height=</span><span class="s">&quot;48dp&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+</span><span class='line'>        <span class="na">android:layout_below=</span><span class="s">&quot;@+id/informations_container&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nt">&lt;HorizontalScrollView</span>
+</span><span class='line'>          <span class="na">android:id=</span><span class="s">&quot;@+id/horizontalscrollview&quot;</span>
+</span><span class='line'>              <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+</span><span class='line'>              <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+</span><span class='line'>              <span class="na">android:scrollbars=</span><span class="s">&quot;none&quot;</span>
+</span><span class='line'>          <span class="nt">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="nt">&lt;LinearLayout</span>
+</span><span class='line'>              <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+</span><span class='line'>              <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+</span><span class='line'>              <span class="na">android:orientation=</span><span class="s">&quot;horizontal&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>              <span class="c">&lt;!-- tabs here --&gt;</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="nt">&lt;/LinearLayout&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/HorizontalScrollView&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/FrameLayout&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nt">&lt;ImageView</span> <span class="err">...</span> <span class="nt">/&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;/RelativeLayout&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Keep a boolean to know if you sticked your view (<code>mIsHeaderSticked</code> here).</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">mIsHeaderSticked</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">mMainView</span> <span class="o">=</span> <span class="o">(</span><span class="n">ViewGroup</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">main_view</span><span class="o">);</span>
+</span><span class='line'><span class="n">mHeader</span> <span class="o">=</span> <span class="n">LayoutInflater</span><span class="o">.</span><span class="na">from</span><span class="o">(</span><span class="k">this</span><span class="o">).</span><span class="na">inflate</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">header</span><span class="o">,</span> <span class="n">mListView</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+</span><span class='line'><span class="n">mHorizontalScrollViewContainer</span> <span class="o">=</span> <span class="o">(</span><span class="n">ViewGroup</span><span class="o">)</span> <span class="n">mHeader</span><span class="o">.</span><span class="na">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">tabs_container</span><span class="o">);</span>
+</span><span class='line'><span class="n">mHorizontalScrollView</span> <span class="o">=</span> <span class="n">mHeader</span><span class="o">.</span><span class="na">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">horizontalscrollview</span><span class="o">);</span>
+</span><span class='line'><span class="n">mListView</span><span class="o">.</span><span class="na">addHeaderView</span><span class="o">(</span><span class="n">mHeader</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">//...</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">mListView</span><span class="o">.</span><span class="na">setOnScrollListener</span><span class="o">(</span><span class="k">new</span> <span class="n">AbsListView</span><span class="o">.</span><span class="na">OnScrollListener</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">//...</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onScroll</span><span class="o">(</span><span class="n">AbsListView</span> <span class="n">view</span><span class="o">,</span> <span class="kt">int</span> <span class="n">firstVisibleItem</span><span class="o">,</span> <span class="kt">int</span> <span class="n">visibleItemCount</span><span class="o">,</span> <span class="kt">int</span> <span class="n">totalItemCount</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">visibleItemCount</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="k">return</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kt">boolean</span> <span class="n">shouldStick</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">view</span><span class="o">.</span><span class="na">getChildAt</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span> <span class="o">!=</span> <span class="n">mHeader</span><span class="o">)</span> <span class="n">shouldStick</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kt">int</span> <span class="n">top</span> <span class="o">=</span> <span class="n">mHeader</span><span class="o">.</span><span class="na">getTop</span><span class="o">();</span>
+</span><span class='line'>            <span class="kt">int</span> <span class="n">tabsHeight</span> <span class="o">=</span> <span class="n">mHorizontalScrollView</span><span class="o">.</span><span class="na">getMeasuredHeight</span><span class="o">();</span>
+</span><span class='line'>            <span class="kt">int</span> <span class="n">headerViewHeight</span> <span class="o">=</span> <span class="n">mHeader</span><span class="o">.</span><span class="na">getMeasuredHeight</span><span class="o">();</span>
+</span><span class='line'>            <span class="kt">int</span> <span class="n">delta</span> <span class="o">=</span> <span class="n">headerViewHeight</span> <span class="o">-</span> <span class="n">tabsHeight</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">delta</span> <span class="o">+</span> <span class="n">top</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span> <span class="n">shouldStick</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">shouldStick</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">mIsSticked</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mIsSticked</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">((</span><span class="n">ViewGroup</span><span class="o">)</span> <span class="n">mHorizontalScrollView</span><span class="o">.</span><span class="na">getParent</span><span class="o">()).</span><span class="na">removeView</span><span class="o">(</span><span class="n">mHorizontalScrollView</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">mMainView</span><span class="o">.</span><span class="na">addView</span><span class="o">(</span><span class="n">mHorizontalScrollView</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(!</span><span class="n">shouldStick</span> <span class="o">&amp;&amp;</span> <span class="n">mIsSticked</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mIsSticked</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">((</span><span class="n">ViewGroup</span><span class="o">)</span> <span class="n">mHorizontalScrollView</span><span class="o">.</span><span class="na">getParent</span><span class="o">()).</span><span class="na">removeView</span><span class="o">(</span><span class="n">mHorizontalScrollView</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">mHorizontalScrollViewContainer</span><span class="o">.</span><span class="na">addView</span><span class="o">(</span><span class="n">mHorizontalScrollView</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3rd solution: Just draw the horizontalScrollView, and capture touch events</h3>
+
+<p>This solution is great if you only have to draw a <strong>stateless</strong> view, but can be pretty hard to implement if you have views you can interact with.</p>
+
+<p>The idea here is to keep the tabs in the ListView&rsquo;s header, but when we need to stick it, the <code>ListView</code> will draw the tabs over the list.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">mListView</span><span class="o">.</span><span class="na">setOnScrollListener</span><span class="o">(</span><span class="k">new</span> <span class="n">AbsListView</span><span class="o">.</span><span class="na">OnScrollListener</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">//...</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onScroll</span><span class="o">(</span><span class="n">AbsListView</span> <span class="n">view</span><span class="o">,</span> <span class="kt">int</span> <span class="n">firstVisibleItem</span><span class="o">,</span> <span class="kt">int</span> <span class="n">visibleItemCount</span><span class="o">,</span> <span class="kt">int</span> <span class="n">totalItemCount</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">visibleItemCount</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="k">return</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kt">boolean</span> <span class="n">shouldStick</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">view</span><span class="o">.</span><span class="na">getChildAt</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span> <span class="o">!=</span> <span class="n">mHeader</span><span class="o">)</span> <span class="n">shouldStick</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kt">int</span> <span class="n">top</span> <span class="o">=</span> <span class="n">mHeader</span><span class="o">.</span><span class="na">getTop</span><span class="o">();</span>
+</span><span class='line'>            <span class="kt">int</span> <span class="n">tabsHeight</span> <span class="o">=</span> <span class="n">mHorizontalScrollView</span><span class="o">.</span><span class="na">getMeasuredHeight</span><span class="o">();</span>
+</span><span class='line'>            <span class="kt">int</span> <span class="n">headerViewHeight</span> <span class="o">=</span> <span class="n">mHeader</span><span class="o">.</span><span class="na">getMeasuredHeight</span><span class="o">();</span>
+</span><span class='line'>            <span class="kt">int</span> <span class="n">delta</span> <span class="o">=</span> <span class="n">headerViewHeight</span> <span class="o">-</span> <span class="n">tabsHeight</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">delta</span> <span class="o">+</span> <span class="n">top</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span> <span class="n">shouldStick</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">//sticky header</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">shouldStick</span><span class="o">)</span>
+</span><span class='line'>            <span class="n">mListView</span><span class="o">.</span><span class="na">setViewToDraw</span><span class="o">(</span><span class="n">mHorizontalScrollViewContainer</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">else</span>
+</span><span class='line'>            <span class="n">mListView</span><span class="o">.</span><span class="na">setViewToDraw</span><span class="o">(</span><span class="kc">null</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In your custom ListView, provide a <code>setViewToDraw</code> method:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">setViewToDraw</span><span class="o">(</span><span class="n">View</span> <span class="n">viewToDraw</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">mViewToDraw</span> <span class="o">==</span> <span class="n">viewToDraw</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">return</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">mViewToDraw</span> <span class="o">=</span> <span class="n">viewToDraw</span><span class="o">;</span>
+</span><span class='line'>    <span class="n">invalidate</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>and override the <code>dispatchDraw</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">dispatchDraw</span><span class="o">(</span><span class="n">Canvas</span> <span class="n">canvas</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">super</span><span class="o">.</span><span class="na">dispatchDraw</span><span class="o">(</span><span class="n">canvas</span><span class="o">);</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">mViewToDraw</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="k">return</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">mViewToDraw</span><span class="o">.</span><span class="na">draw</span><span class="o">(</span><span class="n">canvas</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Your tabs should stick now but you cannot interact with them. Here is what I did, but unfortunately it doesn&rsquo;t work very well, as I am unable to make the fling work&hellip; If you have any idea on how to improve it, please do not hesitate to <a href="http://antoine-merle.com/about">contact me</a>.</p>
+
+<p>Firstly create an enum with the different states:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kd">enum</span> <span class="n">TouchState</span> <span class="o">{</span><span class="n">NONE</span><span class="o">,</span> <span class="n">TOUCHING_HEADER</span><span class="o">}</span>
+</span><span class='line'><span class="kd">private</span> <span class="n">TouchState</span> <span class="n">mTouchState</span> <span class="o">=</span> <span class="n">TouchState</span><span class="o">.</span><span class="na">NONE</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then override the <code>dispatchTouchEvent</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">dispatchTouchEvent</span><span class="o">(</span><span class="n">MotionEvent</span> <span class="n">ev</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">(</span><span class="n">mViewToDraw</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">dispatchTouchEvent</span><span class="o">(</span><span class="n">ev</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kt">int</span> <span class="n">bottom</span> <span class="o">=</span> <span class="n">mViewToDraw</span><span class="o">.</span><span class="na">getMeasuredHeight</span><span class="o">();</span>
+</span><span class='line'>  <span class="kt">boolean</span> <span class="n">captured</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>  <span class="kt">boolean</span> <span class="n">invalidate</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">switch</span> <span class="o">(</span><span class="n">ev</span><span class="o">.</span><span class="na">getAction</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">case</span> <span class="n">MotionEvent</span><span class="o">.</span><span class="na">ACTION_DOWN</span><span class="o">:</span>
+</span><span class='line'>      <span class="k">if</span> <span class="o">(</span><span class="n">ev</span><span class="o">.</span><span class="na">getY</span><span class="o">()</span> <span class="o">&lt;=</span> <span class="n">bottom</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mTouchState</span> <span class="o">=</span> <span class="n">TouchState</span><span class="o">.</span><span class="na">TOUCHING_HEADER</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">invalidate</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">captured</span> <span class="o">=</span> <span class="n">mViewToDraw</span><span class="o">.</span><span class="na">dispatchTouchEvent</span><span class="o">(</span><span class="n">ev</span><span class="o">);</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>      <span class="k">break</span><span class="o">;</span>
+</span><span class='line'>    <span class="k">case</span> <span class="n">MotionEvent</span><span class="o">.</span><span class="na">ACTION_CANCEL</span><span class="o">:</span>
+</span><span class='line'>    <span class="k">case</span> <span class="n">MotionEvent</span><span class="o">.</span><span class="na">ACTION_UP</span><span class="o">:</span>
+</span><span class='line'>      <span class="k">if</span> <span class="o">(</span><span class="n">mTouchState</span> <span class="o">==</span> <span class="n">TouchState</span><span class="o">.</span><span class="na">TOUCHING_HEADER</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mTouchState</span> <span class="o">=</span> <span class="n">TouchState</span><span class="o">.</span><span class="na">NONE</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">invalidate</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">captured</span> <span class="o">=</span> <span class="n">mViewToDraw</span><span class="o">.</span><span class="na">dispatchTouchEvent</span><span class="o">(</span><span class="n">ev</span><span class="o">);</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>      <span class="k">break</span><span class="o">;</span>
+</span><span class='line'>    <span class="k">default</span><span class="o">:</span>
+</span><span class='line'>      <span class="k">if</span> <span class="o">(</span><span class="n">mTouchState</span> <span class="o">==</span> <span class="n">TouchState</span><span class="o">.</span><span class="na">TOUCHING_HEADER</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">invalidate</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">captured</span> <span class="o">=</span> <span class="n">mViewToDraw</span><span class="o">.</span><span class="na">dispatchTouchEvent</span><span class="o">(</span><span class="n">ev</span><span class="o">);</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="o">(</span><span class="n">invalidate</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">invalidate</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">getWidth</span><span class="o">(),</span> <span class="n">bottom</span><span class="o">);</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="o">(</span><span class="n">captured</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">dispatchTouchEvent</span><span class="o">(</span><span class="n">ev</span><span class="o">);</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you want to use this solution, you will clearly need to improve my implementation.</p>
+
+<h3>4th solution: Duplicate the Tabs view and just make it visible/invisible</h3>
+
+<p>This is not a really great way to implement the sticky tabs but this will work and you will avoid  the calls to <code>requestLayout()</code></p>
+
+<p>You will need to copy paste the tabs view in the header&rsquo;s xml and in the main view&rsquo;s xml</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">mListView</span><span class="o">.</span><span class="na">setOnScrollListener</span><span class="o">(</span><span class="k">new</span> <span class="n">AbsListView</span><span class="o">.</span><span class="na">OnScrollListener</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onScroll</span><span class="o">(</span><span class="n">AbsListView</span> <span class="n">view</span><span class="o">,</span> <span class="kt">int</span> <span class="n">firstVisibleItem</span><span class="o">,</span> <span class="kt">int</span> <span class="n">visibleItemCount</span><span class="o">,</span> <span class="kt">int</span> <span class="n">totalItemCount</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">visibleItemCount</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="k">return</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kt">boolean</span> <span class="n">shouldStick</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">view</span><span class="o">.</span><span class="na">getChildAt</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span> <span class="o">!=</span> <span class="n">mHeader</span><span class="o">)</span> <span class="n">shouldStick</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kt">int</span> <span class="n">top</span> <span class="o">=</span> <span class="n">mHeader</span><span class="o">.</span><span class="na">getTop</span><span class="o">();</span>
+</span><span class='line'>            <span class="kt">int</span> <span class="n">tabsHeight</span> <span class="o">=</span> <span class="n">mHorizontalScrollView</span><span class="o">.</span><span class="na">getMeasuredHeight</span><span class="o">();</span>
+</span><span class='line'>            <span class="kt">int</span> <span class="n">headerViewHeight</span> <span class="o">=</span> <span class="n">mHeader</span><span class="o">.</span><span class="na">getMeasuredHeight</span><span class="o">();</span>
+</span><span class='line'>            <span class="kt">int</span> <span class="n">delta</span> <span class="o">=</span> <span class="n">headerViewHeight</span> <span class="o">-</span> <span class="n">tabsHeight</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">delta</span> <span class="o">+</span> <span class="n">top</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span> <span class="n">shouldStick</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="c1">//refresh the scrollY and the visibility</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">shouldStick</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">mIsSticked</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mIsSticked</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>            <span class="n">mStickyTabs</span><span class="o">.</span><span class="na">setScrollY</span><span class="o">(</span><span class="n">mTabsInHeader</span><span class="o">.</span><span class="na">getScrollY</span><span class="o">());</span>
+</span><span class='line'>            <span class="n">mStickyTabs</span><span class="o">.</span><span class="na">setVisibility</span><span class="o">(</span><span class="n">View</span><span class="o">.</span><span class="na">VISIBLE</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(!</span><span class="n">shouldStick</span> <span class="o">&amp;&amp;</span> <span class="n">mIsSticked</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mIsSticked</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>            <span class="n">mTabsInHeader</span><span class="o">.</span><span class="na">setScrollY</span><span class="o">(</span><span class="n">mStickyTabs</span><span class="o">.</span><span class="na">getScrollY</span><span class="o">());</span>
+</span><span class='line'>            <span class="n">mStickyTabs</span><span class="o">.</span><span class="na">setVisibility</span><span class="o">(</span><span class="n">View</span><span class="o">.</span><span class="na">INVISIBLE</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Please note this solution is not a great solution because you have duplicate views, and you will have to set twice your clickListeners.</p>
+
+<p>Here is the overdraw of the sticky tabs:</p>
+
+<p><img class="center" src="/images/screen_gplus_tabs_overdraw.png" title="My design skills again" ></p>
+
+<p>We can notice the view is drawn twice, so I bet they use the solution 3 or 4.</p>
+
+<h1>Conclusion</h1>
+
+<p>I showed you 4 ways to make this screen:</p>
+
+<ol>
+<li>The tabs are in the main view&rsquo;s xml, and we use the setTranslationY method to make it move (playing with margins on pre ICS devices)</li>
+<li>The tabs are in the listview&rsquo;s header, and we change the tabs container&rsquo;s parent when we need to stick it (but this calls requestLayout twice)</li>
+<li>The tabs are in the listview&rsquo;s header, and we just redraw them over the list when we need to stick them (but the touch events are pretty hard to implement)</li>
+<li>The tabs are both in the main view and the listview&rsquo;s header, and we play with setVisibility(INVISIBLE|VISIBLE), but we have a duplicated view, and we need to set clickListeners twice for each tab.</li>
+</ol>
+
+
+<p>I was incapable to find a &lsquo;good&rsquo; way to implement that sticky tabs but if you have any idea, please do not hesitate to comment or contact me! And if you don&rsquo;t, then share it!</p>
+
+<h1>Edit</h1>
+
+<p>Thank you, <a href="https://plus.google.com/+WolframRittmeyer">Wolfram Rittmeyer</a> for suggesting me to use <a href="http://developer.android.com/tools/testing/testing_ui.html">uiautomatorviewer</a> and see how they actually make it in the google plus app. I discovered they use the solution #4. Indead, the tabs are in the header <strong>and</strong> in the <code>FrameLayout</code> containing the <code>ListView</code>. They just turn the visibility of the <code>HorizontalScrollView</code> to VISIBLE/INVISIBLE.</p>
+
+<p><img class="center" src="/images/screen_gplus_uiautomatorviewer.png"></p>
+</div>
+
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet" tw:via="antoine_merle" tw:hashtags="androiddev"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite">
+
+<script type="text/javascript">
+      var disqus_shortname = 'castorflex';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://antoine-merle.com/blog/2013/10/04/making-that-google-plus-profile-screen/';
+        var disqus_url = 'http://antoine-merle.com/blog/2013/10/04/making-that-google-plus-profile-screen/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//go.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+</div>
+</section>
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Antoine Merle
+
+
+Design credit: <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a></footer>
+		</div>
+	</div>
+</body>
+</html>

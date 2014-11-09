@@ -1,0 +1,866 @@
+
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>ListView optimisations : Part 2 (Displaying images in your lists) - An Android Dev Blog</title>
+	<meta name="author" content="Antoine Merle">
+
+	
+	<meta name="description" content="This second post about listview optimisations will talk about the images in your lists. This post is an extension of the first, which one was about &hellip;">
+	<meta name="keywords" content="android, listview, image, images, custom adapter, adapter, imageview, smooth, optimization">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="http://feeds.feedburner.com/AnAndroidDevBlog" rel="alternate" title="An Android Dev Blog" type="application/atom+xml">
+	
+	<link rel="canonical" href="http://antoine-merle.com/listview-optimisations-part-2-displaying-images-in-your-lists/">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<link href="/stylesheets/font-awesome.min.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<link href='http://fonts.googleapis.com/css?family=Nunito:400,300,700' rel='stylesheet' type='text/css'>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+  
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-32954204-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+</head>
+
+
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+			<header id="header" class="inner"><div class="profilepic">
+	
+	<a href="/"><img src="http://www.gravatar.com/avatar/4e3c42cc88b76f693215b1c47dd3cca6?s=160" alt="Profile Picture" style="width: 160px;" /></a>
+	
+</div>
+
+<nav id="main-nav">
+
+<a class="author" href="/">Antoine Merle</a>
+
+
+<section class="aboutme">
+  <p>
+    A blog about Android development, again.
+  </p>
+</section>
+
+<ul>
+    <li><a href="/">Blog</a></li>
+    <li>-</li>
+    <li><a href="/about">About</a></li>
+    <li>-</li>
+    <li><a href="/blog/archives">Archives</a></li>
+</ul></nav>
+
+<!-- Place this tag where you want the widget to render. -->
+<div class="g-follow" data-annotation="bubble" data-height="24" data-href="//plus.google.com/u/0/108486473528609847558" data-rel="author"></div>
+
+<!-- Place this tag after the last widget tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+
+<nav id="sub-nav">
+	<div class="social">
+		
+		
+
+		
+			<a class="twitter" href="http://twitter.com/antoine_merle" title="Twitter">Twitter</a>
+		
+		
+			<a class="github" href="https://github.com/Castorflex" title="GitHub">GitHub</a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+    	
+    	
+			<a class="rss" href="http://feeds.feedburner.com/AnAndroidDevBlog" title="RSS">RSS</a>
+		
+	</div>
+</nav>
+
+<!-- Place this tag after the last widget tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			
+				
+			
+			<div class="mid-col-container">
+				<div id="content" class="inner"><article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-21T00:00:00+01:00" data-updated="true" itemprop="datePublished"></time></div>
+	<h1 class="title" itemprop="name">ListView Optimisations : Part 2 (Displaying Images in Your Lists)</h1>
+	<div class="entry-content" itemprop="articleBody"><h1></h1>
+
+<p>This second post about listview optimisations will talk about the images in your lists. This post is an extension of the first, which one was about the viewholder :</p>
+
+<ul>
+<li><a href="http://antoine-merle.com/listview-optimisations-part-1-the-viewholder/" title="ListView optimisations : Part 1 (the ViewHolder)">ListView opimisation : Part 1 (the ViewHolder)</a> : The viewholder is essential when you make a listView. See this post first.</li>
+</ul>
+
+
+<!-- more -->
+
+
+<h2>I.    The ImageLoader</h2>
+
+<p>We will create a class which will do all the job (here is the skeleton):</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ImageLoader</span> <span class="o">{</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="nf">ImageLoader</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">displayImage</span><span class="o">(</span><span class="n">String</span> <span class="n">url</span><span class="o">,</span> <span class="n">ImageView</span> <span class="n">imageView</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And how to use it in your adapter:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyAdapter</span> <span class="kd">extends</span> <span class="n">BaseAdapter</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">private</span> <span class="n">LayoutInflater</span> <span class="n">mLayoutInflater</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="n">List</span> <span class="n">mData</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="n">ImageLoader</span> <span class="n">mImageLoader</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="nf">MyAdapter</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">List</span> <span class="n">data</span><span class="o">){</span>
+</span><span class='line'>            <span class="n">mData</span> <span class="o">=</span> <span class="n">data</span><span class="o">;</span>
+</span><span class='line'>            <span class="n">mLayoutInflater</span> <span class="o">=</span> <span class="n">LayoutInflater</span><span class="o">.</span><span class="na">from</span><span class="o">(</span><span class="n">context</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">mImageLoader</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ImageLoader</span><span class="o">(</span><span class="n">context</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getCount</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">mData</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span>  <span class="o">:</span> <span class="n">mData</span><span class="o">.</span><span class="na">size</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="n">MyPojo</span> <span class="nf">getItem</span><span class="o">(</span><span class="kt">int</span> <span class="n">position</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">mData</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">position</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">long</span> <span class="nf">getItemId</span><span class="o">(</span><span class="kt">int</span> <span class="n">position</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">position</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">public</span> <span class="n">View</span> <span class="nf">getView</span><span class="o">(</span><span class="kt">int</span> <span class="n">position</span><span class="o">,</span> <span class="n">View</span> <span class="n">view</span><span class="o">,</span> <span class="n">ViewGroup</span> <span class="n">parent</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">View</span> <span class="n">vi</span> <span class="o">=</span> <span class="n">view</span><span class="o">;</span>
+</span><span class='line'>            <span class="n">ViewHolder</span> <span class="n">holder</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">vi</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">vi</span> <span class="o">=</span> <span class="n">mLayoutInflater</span><span class="o">.</span><span class="na">inflate</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">item</span><span class="o">,</span> <span class="n">parent</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+</span><span class='line'>                <span class="n">holder</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ViewHolder</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="n">holder</span><span class="o">.</span><span class="na">ivIcon</span> <span class="o">=</span> <span class="o">(</span><span class="n">ImageView</span><span class="o">)</span> <span class="n">vi</span><span class="o">.</span><span class="na">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">imageView_item_icon</span><span class="o">);</span>
+</span><span class='line'>                <span class="n">vi</span><span class="o">.</span><span class="na">setTag</span><span class="o">(</span><span class="n">holder</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">holder</span> <span class="o">=</span> <span class="o">(</span><span class="n">ViewHolder</span><span class="o">)</span> <span class="n">vi</span><span class="o">.</span><span class="na">getTag</span><span class="o">();</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">MyPojo</span> <span class="n">item</span> <span class="o">=</span> <span class="n">getItem</span><span class="o">(</span><span class="n">position</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">mImageLoader</span><span class="o">.</span><span class="na">displayImage</span><span class="o">(</span><span class="n">item</span><span class="o">.</span><span class="na">getIcon</span><span class="o">(),</span> <span class="n">holder</span><span class="o">.</span><span class="na">icon</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">return</span> <span class="n">vi</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">static</span> <span class="kd">class</span> <span class="nc">ViewHolder</span><span class="o">{</span>
+</span><span class='line'>            <span class="n">ImageView</span> <span class="n">ivIcon</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>A simple picture to understand the role of the ImageLoader:<br/>
+<img class="center" src="/images/imageloader.png"><br/>
+And his code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+<span class='line-number'>124</span>
+<span class='line-number'>125</span>
+<span class='line-number'>126</span>
+<span class='line-number'>127</span>
+<span class='line-number'>128</span>
+<span class='line-number'>129</span>
+<span class='line-number'>130</span>
+<span class='line-number'>131</span>
+<span class='line-number'>132</span>
+<span class='line-number'>133</span>
+<span class='line-number'>134</span>
+<span class='line-number'>135</span>
+<span class='line-number'>136</span>
+<span class='line-number'>137</span>
+<span class='line-number'>138</span>
+<span class='line-number'>139</span>
+<span class='line-number'>140</span>
+<span class='line-number'>141</span>
+<span class='line-number'>142</span>
+<span class='line-number'>143</span>
+<span class='line-number'>144</span>
+<span class='line-number'>145</span>
+<span class='line-number'>146</span>
+<span class='line-number'>147</span>
+<span class='line-number'>148</span>
+<span class='line-number'>149</span>
+<span class='line-number'>150</span>
+<span class='line-number'>151</span>
+<span class='line-number'>152</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ImageLoader</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">private</span> <span class="n">LruCache</span> <span class="n">memoryCache</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="n">FileCache</span> <span class="n">fileCache</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="n">Map</span> <span class="n">imageViews</span> <span class="o">=</span> <span class="n">Collections</span><span class="o">.</span><span class="na">synchronizedMap</span><span class="o">(</span><span class="k">new</span> <span class="n">WeakHashMap</span><span class="o">());</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">private</span> <span class="n">Drawable</span> <span class="n">mStubDrawable</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="nf">ImageLoader</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">fileCache</span> <span class="o">=</span> <span class="k">new</span> <span class="n">FileCache</span><span class="o">(</span><span class="n">context</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">init</span><span class="o">(</span><span class="n">context</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">private</span> <span class="kt">void</span> <span class="nf">init</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="c1">// Get memory class of this device, exceeding this amount will throw an</span>
+</span><span class='line'>            <span class="c1">// OutOfMemory exception.</span>
+</span><span class='line'>            <span class="kd">final</span> <span class="kt">int</span> <span class="n">memClass</span> <span class="o">=</span> <span class="o">((</span><span class="n">ActivityManager</span><span class="o">)</span> <span class="n">context</span><span class="o">.</span><span class="na">getSystemService</span><span class="o">(</span>
+</span><span class='line'>                    <span class="n">Context</span><span class="o">.</span><span class="na">ACTIVITY_SERVICE</span><span class="o">)).</span><span class="na">getMemoryClass</span><span class="o">();</span>
+</span><span class='line'>            <span class="c1">// 1/8 of the available mem</span>
+</span><span class='line'>            <span class="kd">final</span> <span class="kt">int</span> <span class="n">cacheSize</span> <span class="o">=</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="n">memClass</span> <span class="o">/</span> <span class="mi">8</span><span class="o">;</span>
+</span><span class='line'>            <span class="n">memoryCache</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LruCache</span><span class="o">(</span><span class="n">cacheSize</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">mStubDrawable</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="na">getResources</span><span class="o">().</span><span class="na">getDrawable</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">default_icon</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">displayImage</span><span class="o">(</span><span class="n">String</span> <span class="n">url</span><span class="o">,</span> <span class="n">ImageView</span> <span class="n">imageView</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">imageViews</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">imageView</span><span class="o">,</span> <span class="n">url</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">Bitmap</span> <span class="n">bitmap</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">url</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">url</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">&gt;</span> <span class="o">)</span>
+</span><span class='line'>                <span class="n">bitmap</span> <span class="o">=</span> <span class="o">(</span><span class="n">Bitmap</span><span class="o">)</span> <span class="n">memoryCache</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">url</span><span class="o">);</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">bitmap</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="c1">//the image is in the LRU Cache, we can use it directly</span>
+</span><span class='line'>                <span class="n">imageView</span><span class="o">.</span><span class="na">setImageBitmap</span><span class="o">(</span><span class="n">bitmap</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>                <span class="c1">//the image is not in the LRU Cache</span>
+</span><span class='line'>                <span class="c1">//set a default drawable a search the image</span>
+</span><span class='line'>                <span class="n">imageView</span><span class="o">.</span><span class="na">setImageDrawable</span><span class="o">(</span><span class="n">mStubDrawable</span><span class="o">);</span>
+</span><span class='line'>                <span class="k">if</span> <span class="o">(</span><span class="n">url</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">url</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">&gt;</span> <span class="o">)</span>
+</span><span class='line'>                    <span class="n">queuePhoto</span><span class="o">(</span><span class="n">url</span><span class="o">,</span> <span class="n">imageView</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">private</span> <span class="kt">void</span> <span class="nf">queuePhoto</span><span class="o">(</span><span class="n">String</span> <span class="n">url</span><span class="o">,</span> <span class="n">ImageView</span> <span class="n">imageView</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="k">new</span> <span class="nf">LoadBitmapTask</span><span class="o">().</span><span class="na">execute</span><span class="o">(</span><span class="n">url</span><span class="o">,</span> <span class="n">imageView</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="cm">/**</span>
+</span><span class='line'><span class="cm">         * Search for the image in the device, then in the web</span>
+</span><span class='line'><span class="cm">         * @param url</span>
+</span><span class='line'><span class="cm">         * @return</span>
+</span><span class='line'><span class="cm">         */</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="n">Bitmap</span> <span class="nf">getBitmap</span><span class="o">(</span><span class="n">String</span> <span class="n">url</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">Bitmap</span> <span class="n">ret</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>            <span class="c1">//from SD cache</span>
+</span><span class='line'>            <span class="n">File</span> <span class="n">f</span> <span class="o">=</span> <span class="n">fileCache</span><span class="o">.</span><span class="na">getFile</span><span class="o">(</span><span class="n">url</span><span class="o">);</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">f</span><span class="o">.</span><span class="na">exists</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">ret</span> <span class="o">=</span> <span class="n">decodeFile</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
+</span><span class='line'>                <span class="k">if</span> <span class="o">(</span><span class="n">ret</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span>
+</span><span class='line'>                    <span class="k">return</span> <span class="n">ret</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="c1">//from web</span>
+</span><span class='line'>            <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>                <span class="c1">//your requester will fetch the bitmap from the web and store it in the phone using the fileCache</span>
+</span><span class='line'>                <span class="n">ret</span> <span class="o">=</span> <span class="n">MyRequester</span><span class="o">.</span><span class="na">getBitmapFromWebAndStoreItInThePhone</span><span class="o">(</span><span class="n">url</span><span class="o">);</span>    <span class="c1">// your own requester here</span>
+</span><span class='line'>                <span class="k">return</span> <span class="n">ret</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span> <span class="k">catch</span> <span class="o">([</span><span class="n">Exception</span><span class="o">][</span><span class="mi">8</span><span class="o">]</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">ex</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+</span><span class='line'>                <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">//decodes image and scales it to reduce memory consumption</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="n">Bitmap</span> <span class="nf">decodeFile</span><span class="o">(</span><span class="n">File</span> <span class="n">f</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">Bitmap</span> <span class="n">ret</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>            <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>                <span class="o">[</span><span class="n">FileInputStream</span><span class="o">][</span><span class="mi">9</span><span class="o">]</span> <span class="n">is</span> <span class="o">=</span> <span class="k">new</span> <span class="o">[</span><span class="n">FileInputStream</span><span class="o">][</span><span class="mi">9</span><span class="o">](</span><span class="n">f</span><span class="o">);</span>
+</span><span class='line'>                <span class="n">ret</span> <span class="o">=</span> <span class="n">BitmapFactory</span><span class="o">.</span><span class="na">decodeStream</span><span class="o">(</span><span class="n">is</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span> <span class="k">catch</span> <span class="o">([</span><span class="n">FileNotFoundException</span><span class="o">][</span><span class="mi">10</span><span class="o">]</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+</span><span class='line'>            <span class="o">}</span> <span class="k">catch</span> <span class="o">([</span><span class="n">Exception</span><span class="o">][</span><span class="mi">8</span><span class="o">]</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">ret</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">private</span> <span class="kd">class</span> <span class="nc">PhotoToLoad</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">public</span> <span class="n">String</span> <span class="n">url</span><span class="o">;</span>
+</span><span class='line'>            <span class="kd">public</span> <span class="n">ImageView</span> <span class="n">imageView</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="kd">public</span> <span class="nf">PhotoToLoad</span><span class="o">(</span><span class="n">String</span> <span class="n">u</span><span class="o">,</span> <span class="n">ImageView</span> <span class="n">i</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">url</span> <span class="o">=</span> <span class="n">u</span><span class="o">;</span>
+</span><span class='line'>                <span class="n">imageView</span> <span class="o">=</span> <span class="n">i</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">private</span> <span class="kt">boolean</span> <span class="nf">imageViewReused</span><span class="o">(</span><span class="n">PhotoToLoad</span> <span class="n">photoToLoad</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="c1">//tag used here</span>
+</span><span class='line'>            <span class="n">String</span> <span class="n">tag</span> <span class="o">=</span> <span class="n">imageViews</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">photoToLoad</span><span class="o">.</span><span class="na">imageView</span><span class="o">);</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">tag</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="o">!</span><span class="n">tag</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">photoToLoad</span><span class="o">.</span><span class="na">url</span><span class="o">))</span>
+</span><span class='line'>                <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>            <span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">class</span> <span class="nc">LoadBitmapTask</span> <span class="kd">extends</span> <span class="n">AsyncTask</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">private</span> <span class="n">PhotoToLoad</span> <span class="n">mPhoto</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="nd">@Override</span>
+</span><span class='line'>            <span class="kd">protected</span> <span class="n">TransitionDrawable</span> <span class="nf">doInBackground</span><span class="o">([</span><span class="n">Object</span><span class="o">][</span><span class="mi">11</span><span class="o">]...</span> <span class="n">params</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">mPhoto</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PhotoToLoad</span><span class="o">((</span><span class="n">String</span><span class="o">)</span> <span class="n">params</span><span class="o">[],</span> <span class="o">(</span><span class="n">ImageView</span><span class="o">)</span> <span class="n">params</span><span class="o">[</span><span class="mi">1</span><span class="o">]);</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="k">if</span> <span class="o">(</span><span class="n">imageViewReused</span><span class="o">(</span><span class="n">mPhoto</span><span class="o">))</span>
+</span><span class='line'>                    <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>                <span class="n">Bitmap</span> <span class="n">bmp</span> <span class="o">=</span> <span class="n">getBitmap</span><span class="o">(</span><span class="n">mPhoto</span><span class="o">.</span><span class="na">url</span><span class="o">);</span>
+</span><span class='line'>                <span class="k">if</span> <span class="o">(</span><span class="n">bmp</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
+</span><span class='line'>                    <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>                <span class="n">memoryCache</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">mPhoto</span><span class="o">.</span><span class="na">url</span><span class="o">,</span> <span class="n">bmp</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="c1">// TransitionDrawable let you to make a crossfade animation between 2 drawables</span>
+</span><span class='line'>                <span class="c1">// It increase the sensation of smoothness</span>
+</span><span class='line'>                <span class="n">TransitionDrawable</span> <span class="n">td</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>                <span class="k">if</span> <span class="o">(</span><span class="n">bmp</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                    <span class="n">Drawable</span><span class="o">[]</span> <span class="n">drawables</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Drawable</span><span class="o">[</span><span class="mi">2</span><span class="o">];</span>
+</span><span class='line'>                    <span class="n">drawables</span><span class="o">[]</span> <span class="o">=</span> <span class="n">mStubDrawable</span><span class="o">;</span>
+</span><span class='line'>                    <span class="n">drawables</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BitmapDrawable</span><span class="o">(</span><span class="n">Application</span><span class="o">.</span><span class="na">getRessources</span><span class="o">(),</span> <span class="n">bmp</span><span class="o">);</span>
+</span><span class='line'>                    <span class="n">td</span> <span class="o">=</span> <span class="k">new</span> <span class="n">TransitionDrawable</span><span class="o">(</span><span class="n">drawables</span><span class="o">);</span>
+</span><span class='line'>                    <span class="n">td</span><span class="o">.</span><span class="na">setCrossFadeEnabled</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span> <span class="c1">//important if you have transparent bitmaps</span>
+</span><span class='line'>                <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="k">return</span> <span class="n">td</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="nd">@Override</span>
+</span><span class='line'>            <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onPostExecute</span><span class="o">(</span><span class="n">TransitionDrawable</span> <span class="n">td</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="k">if</span> <span class="o">(</span><span class="n">imageViewReused</span><span class="o">(</span><span class="n">mPhoto</span><span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>                    <span class="c1">//imageview reused, just return</span>
+</span><span class='line'>                    <span class="k">return</span><span class="o">;</span>
+</span><span class='line'>                <span class="o">}</span>
+</span><span class='line'>                <span class="k">if</span> <span class="o">(</span><span class="n">td</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                    <span class="c1">// bitmap found, display it !</span>
+</span><span class='line'>                    <span class="n">mPhoto</span><span class="o">.</span><span class="na">imageView</span><span class="o">.</span><span class="na">setImageBitmap</span><span class="o">(</span><span class="n">drawable</span><span class="o">);</span>
+</span><span class='line'>                    <span class="n">mPhoto</span><span class="o">.</span><span class="na">imageView</span><span class="o">.</span><span class="na">setVisibility</span><span class="o">(</span><span class="n">View</span><span class="o">.</span><span class="na">VISIBLE</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>                    <span class="c1">//a little crossfade</span>
+</span><span class='line'>                    <span class="n">td</span><span class="o">.</span><span class="na">startTransition</span><span class="o">(</span><span class="mi">200</span><span class="o">);</span>
+</span><span class='line'>                <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>                    <span class="c1">//bitmap not found, display the default drawable</span>
+</span><span class='line'>                    <span class="n">mPhoto</span><span class="o">.</span><span class="na">imageView</span><span class="o">.</span><span class="na">setImageDrawable</span><span class="o">(</span><span class="n">mStubDrawable</span><span class="o">);</span>
+</span><span class='line'>                <span class="o">}</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>FileCache:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">FileCache</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">File</span> <span class="n">cacheDir</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">FileCache</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">(</span><span class="n">context</span><span class="o">,</span> <span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">FileCache</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="kt">long</span> <span class="n">evt</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">//Find the dir to save cached images</span>
+</span><span class='line'>        <span class="n">cacheDir</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="na">getCacheDir</span><span class="o">();</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(!</span><span class="n">cacheDir</span><span class="o">.</span><span class="na">exists</span><span class="o">())</span>
+</span><span class='line'>            <span class="n">cacheDir</span><span class="o">.</span><span class="na">mkdirs</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">File</span> <span class="nf">getFile</span><span class="o">(</span><span class="n">String</span> <span class="n">url</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="k">new</span> <span class="nf">File</span><span class="o">(</span><span class="n">cacheDir</span><span class="o">,</span> <span class="n">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">url</span><span class="o">.</span><span class="na">hashCode</span><span class="o">()));</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">clear</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">File</span><span class="o">[]</span> <span class="n">files</span> <span class="o">=</span> <span class="n">cacheDir</span><span class="o">.</span><span class="na">listFiles</span><span class="o">();</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">files</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
+</span><span class='line'>            <span class="k">return</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">for</span> <span class="o">(</span><span class="n">File</span> <span class="n">f</span> <span class="o">:</span> <span class="n">files</span><span class="o">)</span>
+</span><span class='line'>            <span class="n">f</span><span class="o">.</span><span class="na">delete</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong><em>Note 1</em></strong>: <em>The crossfade is done with a <a href="http://developer.android.com/reference/android/graphics/drawable/TransitionDrawable.html">TransitionDrawable</a>, which give the feeling that your list scroll smoother!</em></p>
+
+<p><strong><em>Note 2</em></strong>: <em>Try to avoid the setImageResource(ind resId) as much as possible and create a default drawable when you init your imageLoader. Indeed, according to the <a href="http://developer.android.com/reference/android/widget/ImageView.html#setImageResource(int)">DOC</a>,</em></p>
+
+<blockquote><p>This does Bitmap reading and decoding on the UI thread, which can cause a latency hiccup. If that&rsquo;s a concern, consider using <code>setImageDrawable(Drawable)</code> or <code>setImageBitmap(Bitmap)</code> and <code>BitmapFactory</code> instead.</p></blockquote>
+
+<p><strong><em>Note 3</em></strong> : <em>We use the fileCache here to get bitmaps, but we store the bitmaps thanks to our requester. You can do this very easily using an InputStream and an OutputStream</em></p>
+
+<h2>II. The BlockingImageView</h2>
+
+<p>When you scroll now your list, you can notice some lags when images are displayed. This is due to the setImageDrawable(Drawable d) wich can call a requestLayout (which one can take some time).</p>
+
+<p>There is a way to block the requestLayout, pretty simple. I found it thanks to Jorim Jaggy, <a href="https://plus.google.com/113058165720861374515/posts/iTk4PjgeAWX">on this google post</a>. But look at the source code of the ImageView first:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm">     * Sets a drawable as the content of this ImageView.</span>
+</span><span class='line'><span class="cm">     * </span>
+</span><span class='line'><span class="cm">     * @param drawable The drawable to set</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setImageDrawable</span><span class="o">(</span><span class="n">Drawable</span> <span class="n">drawable</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mDrawable</span> <span class="o">!=</span> <span class="n">drawable</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mResource</span> <span class="o">=</span> <span class="o">;</span>
+</span><span class='line'>            <span class="n">mUri</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="kt">int</span> <span class="n">oldWidth</span> <span class="o">=</span> <span class="n">mDrawableWidth</span><span class="o">;</span>
+</span><span class='line'>            <span class="kt">int</span> <span class="n">oldHeight</span> <span class="o">=</span> <span class="n">mDrawableHeight</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">updateDrawable</span><span class="o">(</span><span class="n">drawable</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">oldWidth</span> <span class="o">!=</span> <span class="n">mDrawableWidth</span> <span class="o">||</span> <span class="n">oldHeight</span> <span class="o">!=</span> <span class="n">mDrawableHeight</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">requestLayout</span><span class="o">();</span>    <span class="c1">//HERE</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>            <span class="n">invalidate</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you know that the dimension of all your images is the same, then you can block the <code>requestlayout</code>, by using a custom <code>ImageView</code> :</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">BlockingImageView</span> <span class="kd">extends</span> <span class="n">ImageView</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kt">boolean</span> <span class="n">mBlockLayout</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">BlockingImageView</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">(</span><span class="n">context</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">BlockingImageView</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">AttributeSet</span> <span class="n">attrs</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">(</span><span class="n">context</span><span class="o">,</span> <span class="n">attrs</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">BlockingImageView</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">AttributeSet</span> <span class="n">attrs</span><span class="o">,</span> <span class="kt">int</span> <span class="n">defStyle</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">(</span><span class="n">context</span><span class="o">,</span> <span class="n">attrs</span><span class="o">,</span> <span class="n">defStyle</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">requestLayout</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(!</span><span class="n">mBlockLayout</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">super</span><span class="o">.</span><span class="na">requestLayout</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setImageResource</span><span class="o">(</span><span class="kt">int</span> <span class="n">resId</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mBlockLayout</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">setImageResource</span><span class="o">(</span><span class="n">resId</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mBlockLayout</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setImageURI</span><span class="o">(</span><span class="n">Uri</span> <span class="n">uri</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mBlockLayout</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">setImageURI</span><span class="o">(</span><span class="n">uri</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mBlockLayout</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setImageDrawable</span><span class="o">(</span><span class="n">Drawable</span> <span class="n">drawable</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mBlockLayout</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">setImageDrawable</span><span class="o">(</span><span class="n">drawable</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mBlockLayout</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Don’t forget to modify the xml of your elements to add your custom <code>ImageView</code>.</p>
+
+<p>You should now have a smoothy listView with images.</p>
+
+<p>Hope you enjoyed, do not hesitate to leave comments and share it!</p>
+</div>
+
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+	
+	
+	<a class="addthis_button_tweet" tw:via="antoine_merle" tw:hashtags="androiddev"></a>
+	
+	
+	<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+	
+	<a class="addthis_counter addthis_pill_style"></a>
+	</div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+
+
+<section id="comment">
+    <h1 class="title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite">
+
+<script type="text/javascript">
+      var disqus_shortname = 'castorflex';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://antoine-merle.com/listview-optimisations-part-2-displaying-images-in-your-lists/';
+        var disqus_url = 'http://antoine-merle.com/listview-optimisations-part-2-displaying-images-in-your-lists/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//go.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+</div>
+</section>
+</div>
+			</div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Antoine Merle
+
+
+Design credit: <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a></footer>
+		</div>
+	</div>
+</body>
+</html>
