@@ -4,7 +4,7 @@
   <title><![CDATA[An Android Dev Blog]]></title>
   <link href="http://antoine-merle.com/atom.xml" rel="self"/>
   <link href="http://antoine-merle.com/"/>
-  <updated>2014-11-09T19:47:12+01:00</updated>
+  <updated>2015-10-10T19:29:40+02:00</updated>
   <id>http://antoine-merle.com/</id>
   <author>
     <name><![CDATA[Antoine Merle]]></name>
@@ -12,6 +12,104 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Keep your features in progress out of your release builds]]></title>
+    <link href="http://antoine-merle.com/blog/2015/10/10/keep-your-features-in-progress-out-of-your-release-builds/"/>
+    <updated>2015-10-10T17:56:44+02:00</updated>
+    <id>http://antoine-merle.com/blog/2015/10/10/keep-your-features-in-progress-out-of-your-release-builds</id>
+    <content type="html"><![CDATA[<p>When developing Android apps, you sometimes need to create new activities (yes, than does happen). You can create your whole new activity at once and push it, but that rarely happens. You will often need many iterations, to create - say - your list items, your logic, etc. As your new feature can make some time (weeks) to be created, you need to find a way to keep it hidden from the users.</p>
+
+<p>You can do that by committing on a separate branch, but you will arrive at a point where your work is about to be ready to be tested. For example, your QA team might need to test your new Activity, among other features from the rest of your Android team. You can merge all these branches on some QA branch, but that would mean you cannot separate what is production ready from what you want to keep hidden until the next iteration.</p>
+
+<p>The <a href="https://sites.google.com/a/android.com/tools/tech-docs/new-build-system/user-guide/manifest-merger">manifest merger</a> can help you keeping stuff out of your production builds. All you have to do is to choose a build type (except release, ofc&hellip;) in which you will put your stuff that needs to stay hidden. I use to put these activities in the debug build type, but we could imagine a custom QA buildtype for example.</p>
+
+<!-- more -->
+
+
+<p>Here is what your tree view will look like:</p>
+
+<p><img class="center" src="http://antoine-merle.com/images/treeview_flavor_debug.png"></p>
+
+<p>The manifest in your debug folder will specify the <code>PrototypeActivity</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;application&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;activity</span> <span class="na">android:name=</span><span class="s">&quot;.prototypes.PrototypeActivity&quot;</span>
+</span><span class='line'>              <span class="na">android:label=</span><span class="s">&quot;MyPrototypeActivity&quot;</span> <span class="nt">/&gt;</span>
+</span><span class='line'><span class="nt">&lt;/application&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Ok cool, but this <code>PrototypeActivity</code> ain&rsquo;t linked anywhere, making it pretty useless here as you can&rsquo;t use it. As the &lsquo;main&rsquo; flavor doesn&rsquo;t know about the <code>PrototypeActivity</code>, you cannot start it using an explicit intent. That&rsquo;s why you&rsquo;ll start the prototypeActivity with a implicit intent. <em>I will use here a custom action, but you can imagine other ways, like custom deep links for example.</em></p>
+
+<p>Just add an intent-filter in your debug manifest to handle your action, and you&rsquo;re good to go.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;application&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;activity</span> <span class="na">android:name=</span><span class="s">&quot;.prototypes.PrototypeActivity&quot;</span>
+</span><span class='line'>              <span class="na">android:label=</span><span class="s">&quot;MyPrototypeActivity&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;intent-filter&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;fr.castorflex.myapplication.prototypes.prototypeActivity&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.category.DEFAULT&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/intent-filter&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/activity&gt;</span>
+</span><span class='line'><span class="nt">&lt;/application&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You&rsquo;ll then have two ways to start the new Activity. You can either use the terminal and <code>adb shell start</code> an action, or create an implicit intent in your code.</p>
+
+<ul>
+<li>Command line:</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>~$ adb shell am start -a fr.castorflex.myapplication.prototypes.prototypeActivity
+</span><span class='line'>Starting: Intent { act=fr.castorflex.myapplication.prototypes.prototypeActivity }
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You can even add some extra, flags, etc. in the intent. You will find the full adb shell documentation <a href="https://developer.android.com/tools/help/shell.html">at this address</a>.</p>
+
+<ul>
+<li>Programmatically:</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">Intent</span><span class="o">(</span><span class="s">&quot;fr.castorflex.myapplication.prototypes.prototypeActivity&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="n">mContext</span><span class="o">.</span><span class="na">startActivity</span><span class="o">(</span><span class="n">intent</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Going further</h2>
+
+<p>Beyond new Activities, you can hide many other things in your debug builds, like testing features or utilities (clear dat cache, add a delay to my requests, send me the logs via email, etc.). That will let you test your app even not at work, and you&rsquo;ll be sure it&rsquo;s not gonna be in your release builds.</p>
+
+<p>In conclusion, I think that hiding stuff in build types has many advantages over hiding stuff directly in the code:</p>
+
+<ul>
+<li><p>You know for sure these features won&rsquo;t be available in production</p></li>
+<li><p>Your release apk will not contains unused stuff (cool for the size, nice for the 65k methods)</p></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Make your ProgressBar smoother]]></title>

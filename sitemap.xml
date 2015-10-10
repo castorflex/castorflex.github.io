@@ -1,93 +1,91 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://antoine-merle.com/blog/2015/10/10/keep-your-features-in-progress-out-of-your-release-builds/</loc>
+    <lastmod>2015-10-10T17:56:44+02:00</lastmod>
+  </url>
+  <url>
     <loc>http://antoine-merle.com/blog/2013/11/12/make-your-progressbar-more-smooth/</loc>
     <lastmod>2013-11-12T21:00:00+01:00</lastmod>
-    <priority>0.8</priority>
   </url>
   <url>
     <loc>http://antoine-merle.com/blog/2013/10/04/making-that-google-plus-profile-screen/</loc>
     <lastmod>2013-10-04T06:54:00+02:00</lastmod>
-    <priority>0.8</priority>
   </url>
   <url>
     <loc>http://antoine-merle.com/blog/2013/07/17/adding-a-foreground-selector-to-a-view/</loc>
     <lastmod>2013-07-17T23:34:00+02:00</lastmod>
-    <priority>0.8</priority>
   </url>
   <url>
     <loc>http://antoine-merle.com/blog/2013/06/11/making-a-multiple-view-type-adapter-with-annotations/</loc>
     <lastmod>2013-06-11T19:49:00+02:00</lastmod>
-    <priority>0.8</priority>
   </url>
   <url>
     <loc>http://antoine-merle.com/blog/2013/04/16/flip-your-imageviews/</loc>
     <lastmod>2013-04-16T20:06:00+02:00</lastmod>
-    <priority>0.8</priority>
   </url>
   <url>
     <loc>http://antoine-merle.com/blog/2013/04/12/making-a-bounce-animation-for-your-sliding-menu/</loc>
     <lastmod>2013-04-12T13:35:00+02:00</lastmod>
-    <priority>0.8</priority>
   </url>
   <url>
     <loc>http://antoine-merle.com/blog/2013/04/12/makeover/</loc>
     <lastmod>2013-04-12T13:24:00+02:00</lastmod>
-    <priority>0.8</priority>
   </url>
   <url>
     <loc>http://antoine-merle.com/listview-optimisations-part-2-displaying-images-in-your-lists/</loc>
     <lastmod>2012-11-21T00:00:00+01:00</lastmod>
-    <priority>0.8</priority>
   </url>
   <url>
     <loc>http://antoine-merle.com/using-monkey-tool/</loc>
     <lastmod>2012-11-20T00:00:00+01:00</lastmod>
-    <priority>0.8</priority>
   </url>
   <url>
     <loc>http://antoine-merle.com/listview-optimisations-part-1-the-viewholder/</loc>
     <lastmod>2012-11-20T00:00:00+01:00</lastmod>
-    <priority>0.8</priority>
   </url>
   <url>
     <loc>http://antoine-merle.com/introduction-to-the-monkey-runner-tool-2/</loc>
     <lastmod>2012-11-20T00:00:00+01:00</lastmod>
-    <priority>0.8</priority>
   </url>
   <url>
     <loc>http://antoine-merle.com/hello-world/</loc>
     <lastmod>2012-06-22T00:00:00+02:00</lastmod>
-    <priority>0.8</priority>
   </url>
   <url>
     <loc>http://antoine-merle.com/404.html</loc>
-    <lastmod>2014-11-09T19:47:12+01:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
   </url>
   <url>
     <loc>http://antoine-merle.com/blog/archives/</loc>
-    <lastmod>2014-11-09T19:47:12+01:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
   </url>
   <url>
     <loc>http://antoine-merle.com/</loc>
-    <lastmod>2014-11-09T19:47:12+01:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
   </url>
   <url>
     <loc>http://antoine-merle.com/blog/categories/</loc>
-    <lastmod>2014-11-09T19:47:12+01:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
   </url>
   <url>
     <loc>http://antoine-merle.com/about/</loc>
-    <lastmod>2014-11-09T19:47:12+01:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>http://antoine-merle.com/blog/categories/uncategorized/</loc>
+  </url>
+  <url>
+    <loc>http://antoine-merle.com/blog/categories/tests/</loc>
+  </url>
+  <url>
+    <loc>http://antoine-merle.com/blog/categories/adapter/</loc>
+  </url>
+  <url>
+    <loc>http://antoine-merle.com/blog/categories/listview/</loc>
+  </url>
+  <url>
+    <loc>http://antoine-merle.com/blog/categories/animations/</loc>
+  </url>
+  <url>
+    <loc>http://antoine-merle.com/blog/categories/ui-slash-ux/</loc>
+  </url>
+  <url>
+    <loc>http://antoine-merle.com/blog/categories/ui/</loc>
   </url>
 </urlset>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ui | An Android Dev Blog]]></title>
   <link href="http://antoine-merle.com/blog/categories/ui/atom.xml" rel="self"/>
   <link href="http://antoine-merle.com/"/>
-  <updated>2014-11-09T19:47:12+01:00</updated>
+  <updated>2015-10-10T19:29:40+02:00</updated>
   <id>http://antoine-merle.com/</id>
   <author>
     <name><![CDATA[Antoine Merle]]></name>
@@ -206,7 +206,7 @@ for (int i = 0; i &lt; mSectionsCount; ++i) {
 
 <p>Here is an example of hierarchy you could have:</p>
 
-<p>&#8220;`xml</p>
+<p>```xml</p>
 
 <!-- in a real application you should use styles and dimens... -->
 
@@ -285,7 +285,7 @@ for (int i = 0; i &lt; mSectionsCount; ++i) {
 </code></pre>
 
 <p></RelativeLayout>
-&#8220;`</p>
+```</p>
 
 <p>This is basically all concerning the view hierarchy.</p>
 

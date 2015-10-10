@@ -9,7 +9,7 @@
 	<meta name="author" content="Antoine Merle">
 
 	
-	<meta name="description" content="Make Your ProgressBar Smoother If you use the android Gmail application, you probably noticed that the progress bar is a bit customized. I am not &hellip;">
+	<meta name="description" content="Keep Your Features in Progress Out of Your Release Builds When developing Android apps, you sometimes need to create new activities (yes, than does &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -130,6 +130,37 @@
 			<div class="mid-col-container">
 				<div id="content" class="inner">
 <div itemscope itemtype="http://schema.org/Blog">
+
+
+    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
+ 
+ 	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-10-10T17:56:44+02:00" data-updated="true" itemprop="datePublished"></time></div>
+	<h1 class="title" itemprop="name"><a href="/blog/2015/10/10/keep-your-features-in-progress-out-of-your-release-builds/" itemprop="url">Keep Your Features in Progress Out of Your Release Builds</a></h1>
+	<div class="entry-content" itemprop="articleBody">
+		<p>When developing Android apps, you sometimes need to create new activities (yes, than does happen). You can create your whole new activity at once and push it, but that rarely happens. You will often need many iterations, to create - say - your list items, your logic, etc. As your new feature can make some time (weeks) to be created, you need to find a way to keep it hidden from the users.</p>
+
+<p>You can do that by committing on a separate branch, but you will arrive at a point where your work is about to be ready to be tested. For example, your QA team might need to test your new Activity, among other features from the rest of your Android team. You can merge all these branches on some QA branch, but that would mean you cannot separate what is production ready from what you want to keep hidden until the next iteration.</p>
+
+<p>The <a href="https://sites.google.com/a/android.com/tools/tech-docs/new-build-system/user-guide/manifest-merger">manifest merger</a> can help you keeping stuff out of your production builds. All you have to do is to choose a build type (except release, ofc&hellip;) in which you will put your stuff that needs to stay hidden. I use to put these activities in the debug build type, but we could imagine a custom QA buildtype for example.</p>
+
+
+		
+		<a href="/blog/2015/10/10/keep-your-features-in-progress-out-of-your-release-builds/" class="more-link">Read on &rarr;</a>
+	</div>
+
+</article>
 
 
     <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
@@ -419,35 +450,6 @@ Due to some laziness and limitations, my next posts will be english only.</p>
 
 </article>
 
-
-    <article class="post" itemprop="blogPost" itemscope itemtype="http://schema.org/BlogPosting">
- 
- 	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-20T00:00:00+01:00" data-updated="true" itemprop="datePublished"></time></div>
-	<h1 class="title" itemprop="name"><a href="/listview-optimisations-part-1-the-viewholder/" itemprop="url">ListView Optimisations : Part 1 (the ViewHolder)</a></h1>
-	<div class="entry-content" itemprop="articleBody">
-		<h1></h1>
-
-<p>When you develop on Android, you will probably need to make lists pretty quickly. However, it can be complicated to understand all the mecanisms when you are a beginner. This serie of posts aims to give you tips if you want to increase the smoothness in your lists.</p>
-
-<p>This first post is a basic one which talk about a well known tip, called ViewHolder. 
-		
-		<a href="/listview-optimisations-part-1-the-viewholder/" class="more-link">Read on &rarr;</a>
-	</div>
-
-</article>
-
 </div>
 <nav id="pagenavi">
     
@@ -457,7 +459,7 @@ Due to some laziness and limitations, my next posts will be english only.</p>
     <div class="center"><a href="/blog/archives">Blog Archives</a></div>
 </nav></div>
 			</div>
-			<footer id="footer" class="inner">Copyright &copy; 2014
+			<footer id="footer" class="inner">Copyright &copy; 2015
 
     Antoine Merle
 
