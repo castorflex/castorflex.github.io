@@ -4,7 +4,7 @@
   <title><![CDATA[An Android Dev Blog]]></title>
   <link href="http://antoine-merle.com/atom.xml" rel="self"/>
   <link href="http://antoine-merle.com/"/>
-  <updated>2015-10-10T20:04:13+02:00</updated>
+  <updated>2015-10-24T11:42:41+02:00</updated>
   <id>http://antoine-merle.com/</id>
   <author>
     <name><![CDATA[Antoine Merle]]></name>
@@ -44,7 +44,16 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Ok cool, but this <code>PrototypeActivity</code> ain&rsquo;t linked anywhere, making it pretty useless here as you can&rsquo;t use it. As the &lsquo;main&rsquo; flavor doesn&rsquo;t know about the <code>PrototypeActivity</code>, you cannot start it using an explicit intent. That&rsquo;s why you&rsquo;ll start the prototypeActivity with a implicit intent. <em>I will use here a custom action, but you can imagine other ways, like custom deep links for example.</em></p>
+<p>From now, the only way you can use this activity is by starting an explicit intent. You can do this either by command line or using <em>android studio > right click activity > Run &lsquo;PrototypeActivity&rsquo;</em> (thx @andy_lawton).</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>~$ adb shell am start -n &quot;castorflex.fr.myapplication/fr.castorflex.myapplication.prototypes.PrototypeActivity&quot;
+</span><span class='line'>Starting: Intent { cmp=castorflex.fr.myapplication/fr.castorflex.myapplication.prototypes.PrototypeActivity }
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Or you can add an intent filter to your prototype to start it with an implicit intent: <em>I will use here a custom action, but you can imagine other ways, like custom deep links for example.</em></p>
 
 <p>Just add an intent-filter in your debug manifest to handle your action, and you&rsquo;re good to go.</p>
 
@@ -69,7 +78,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>You&rsquo;ll then have two ways to start the new Activity. You can either use the terminal and <code>adb shell start</code> an action, or create an implicit intent in your code.</p>
+<p>You&rsquo;ll then have new ways to start the new Activity. You can either use the terminal and <code>adb shell start</code> an action, or create an implicit intent in your code.</p>
 
 <ul>
 <li>Command line:</li>
@@ -99,9 +108,9 @@
 
 <h2>Going further</h2>
 
-<p>Beyond new Activities, you can hide many other things in your debug builds, like testing features or utilities (clear dat cache, add a delay to my requests, send me the logs via email, etc.). That will let you test your app under certain conditions outside of the office, and you&rsquo;ll be sure it&rsquo;s not gonna be in your release builds.</p>
+<p>Beyond new Activities, you can hide many other things in your debug builds, like testing features or utilities (clear data cache, add a delay to all requests, send yourself the logs via email, etc.). That will let you test your app under certain conditions outside of the office, and you&rsquo;ll be sure it&rsquo;s not gonna be in your release builds.</p>
 
-<p>In conclusion, I think that hiding stuff in build types has many advantages over hiding stuff directly in the code:</p>
+<p>In conclusion, hiding stuff in build types has many advantages over hiding stuff directly in the code:</p>
 
 <ul>
 <li><p>You know for sure these features won&rsquo;t be available in production</p></li>
